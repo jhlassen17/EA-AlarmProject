@@ -1,0 +1,6 @@
+This is a repository for our COMP Alarm Project.
+
+The "Test Code" folder contains various tests that we have run in order to better understand the board.
+
+So far we know that the "costate" keyword is similar to a thread and that there must be at least one costate in order 
+for the application to run.
