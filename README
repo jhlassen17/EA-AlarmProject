@@ -2,5 +2,12 @@ This is a repository for our COMP Alarm Project.
 
 The "Test Code" folder contains various tests that we have run in order to better understand the board.
 
-So far we know that the "costate" keyword is similar to a thread and that there must be at least one costate in order 
+So far we believe that the "costate" keyword is similar to a thread and that there must be at least one costate in order 
 for the application to run.
+
+Below are links for the RabbitWeb library:
+ftp://ftp1.digi.com/support/documentation/0200057_d.pdf
+
+http://www.rabbitsemiconductor.com.cn/products/dc/RabbitWeb/index.htm
+
+http://datasheets.chipdb.org/Rabbit/Dynamic%20C/tcpV2.pdf
