@@ -1,0 +1,6 @@
+<HTML><HEAD><TITLE>Web Variables</TITLE></HEAD>
+<BODY><H1>Web Variables</H1>
+<P>The current value of io_state is
+<?z echo($io_state) ?>
+</P>
+</BODY></HTML>
