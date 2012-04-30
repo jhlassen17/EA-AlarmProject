@@ -122,9 +122,27 @@ void main(void)
 	// directory.
    sspec_addrule("/admin", "Admin", admin, admin, SERVER_ANY,
                  SERVER_AUTH_BASIC, NULL);
+
 	// The following two lines create an "admin" user and adds it to the admin
 	// group.
    userid = sauth_adduser("rabbit", "fish", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+
+   // Add our own users
+   // Ario
+   userid = sauth_adduser("rabbit", "fish", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Chan
+   userid = sauth_adduser("chan", "bar", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Jeff
+   userid = sauth_adduser("jeff", "bar7", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Shea
+   userid = sauth_adduser("shea", "bar2", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Toby
+   userid = sauth_adduser("toby", "bar3", SERVER_ANY);
    sauth_setusermask(userid, admin, NULL);
 
 	// This drives the HTTP server.
