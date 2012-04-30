@@ -72,7 +72,7 @@
  * This macro defines how many users can be associated with a web
  * page, and defaults to 1.
  */
-#define SSPEC_USERSPERRESOURCE 	3
+#define SSPEC_USERSPERRESOURCE 	5
 
 /*
  * If you are using only the ZSERVER.LIB functions to manage the table
@@ -135,14 +135,18 @@ void main(void)
 	int user1;
 	int user2;
 	int user3;
+   int user4;
+   int user5;
 	int user1_enabled;
 	int user2_enabled;
 	int user3_enabled;
+   int user4_enabled;
+   int user5_enabled;
 	int page1;
 	int page2;
 	int ch;
 
-	printf("Press '1', '2', or '3' to disable/enable the three users.\n");
+	printf("Press '1', '2', '3', '4', or '5' to disable/enable the five users.\n");
 	printf("Press 'b', 'd', or 'n' to set the authentication to basic, digest, or none.\n\n");
 
 	/*
@@ -170,20 +174,28 @@ void main(void)
 	user1_enabled = 1;
 	user2_enabled = 1;
 	user3_enabled = 1;
-	user1 = sauth_adduser("foo", "bar", SERVER_HTTPS);
-	user2 = sauth_adduser("foo2", "bar2", SERVER_HTTPS);
-	user3 = sauth_adduser("foo3", "bar3", SERVER_HTTPS);
+   user4_enabled = 1;
+   user5_enabled = 1;
+	user1 = sauth_adduser("ario", "bar", SERVER_HTTPS);
+	user2 = sauth_adduser("chan", "bar2", SERVER_HTTPS);
+	user3 = sauth_adduser("jeff", "bar3", SERVER_HTTPS);
+   user4 = sauth_adduser("shea", "bar4", SERVER_HTTPS);
+   user5 = sauth_adduser("toby", "bar5", SERVER_HTTPS);
 
 	page1 = sspec_addxmemfile("/", index_html, SERVER_HTTPS);
 	sspec_adduser(page1, user1);
 	sspec_adduser(page1, user2);
 	sspec_adduser(page1, user3);
+   sspec_adduser(page1, user4);
+   sspec_adduser(page1, user5);
 	sspec_setrealm(page1, "Admin");
 
 	page2 = sspec_addxmemfile("index.html", index_html, SERVER_HTTPS);
 	sspec_adduser(page2, user1);
 	sspec_adduser(page2, user2);
 	sspec_adduser(page2, user3);
+   sspec_adduser(page2, user4);
+   sspec_adduser(page2, user5);
 	sspec_setrealm(page2, "Admin");
 
 	sspec_addxmemfile("rabbit1.gif", rabbit1_gif, SERVER_HTTPS);
@@ -250,6 +262,32 @@ void main(void)
 					sspec_removeuser(page1, user3);
 					sspec_removeuser(page2, user3);
 					printf("User 3 disabled\n");
+				}
+				break;
+         case '4':
+				user4_enabled = !user4_enabled;
+				if (user4_enabled) {
+					sspec_adduser(page1, user4);
+					sspec_adduser(page2, user4);
+					printf("User 4 enabled\n");
+				}
+				else {
+					sspec_removeuser(page1, user4);
+					sspec_removeuser(page2, user4);
+					printf("User 4 disabled\n");
+				}
+				break;
+         case '5':
+				user5_enabled = !user5_enabled;
+				if (user5_enabled) {
+					sspec_adduser(page1, user5);
+					sspec_adduser(page2, user5);
+					printf("User 5 enabled\n");
+				}
+				else {
+					sspec_removeuser(page1, user5);
+					sspec_removeuser(page2, user5);
+					printf("User 5 disabled\n");
 				}
 				break;
 			case 'b':
