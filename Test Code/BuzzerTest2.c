@@ -105,24 +105,26 @@ void main()
 		//	digOut(channel, output_level);
 		//}
 
-		for(channel = 4; channel < 8; channel++)	//output to channels 8 - 15
-		{
-	      reading = digIn(channel);
-         channels[channel] = reading;
-			//output_level = channels[channel];		//output logic level to channel
-			digOut(channel - 4, reading);
+		//for(channel = 4; channel < 8; channel++)	//output to channels 8 - 15
+		//{
+	   //   reading = digIn(channel);
+      //   channels[channel] = reading;
+		//	//output_level = channels[channel];		//output logic level to channel
+		//	digOut(channel - 4, reading);
 
 
-		}
+		//}
+
+      digOut(8,0);
 
       //if(channels[7])
       //{
-      	digOut(11,channels[7]);
+      	//digOut(11,channels[7]);
 
       //}
       //else if(channels[6])
       //{
-      	digOut(11,channels[6]);
+      	//digOut(11,channels[6]);
         // }
          //
          }
