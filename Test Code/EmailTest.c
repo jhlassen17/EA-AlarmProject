@@ -117,7 +117,12 @@ void main()
 
 //	smtp_sendmail(TO, FROM, SUBJECT, BODY);
 
-  	smtp_sendmail("i242714@rppkn.com", "alarm@yalost.me",
+// "###@messaging.sprintpcs.com"
+// "###@txt.att.net"
+// "###@vtext.com"
+// "###@tmomail.net"
+
+  	smtp_sendmail("8186264197@tmomail.net", "alarm@yalost.me",
    	"You've got rabbit mail!", "Visit the Rabbit Semiconductor web site.\r\n" \
 	"There you'll find the latest news about Dynamic C.");
 

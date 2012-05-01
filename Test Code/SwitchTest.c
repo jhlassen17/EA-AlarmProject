@@ -85,7 +85,7 @@ void main()
    digOutConfig(DIGOUTCONFIG);
 
    // Set all outputs to be OFF
-	for(channel = 0; channel < 8; channel++)
+	for(channel = 4; channel < 8; channel++)
 	{
    	// Set output to be OFF
 		channels[channel] = 1;
@@ -108,7 +108,7 @@ void main()
 		{
 	      reading = digIn(channel);
          channels[channel] = reading;
-			//output_level = channels[channel];		//output logic level to channel
+			output_level = channels[channel];		//output logic level to channel
 			digOut(channel - 4, reading);
 
 
