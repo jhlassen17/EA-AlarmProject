@@ -21,7 +21,7 @@
  * LIB\TCPIP\TCP_CONFIG.LIB for instructions on how to set the
  * configuration.
  */
-#define TCPCONFIG 1
+#define TCPCONFIG 3
 
 /*
  *   These macros need to be changed to the appropriate values or
@@ -29,8 +29,8 @@
  *   reference your values.
  */
 
-#define FROM     "myaddress@mydomain.com"
-#define TO       "myaddress@mydomain.com"
+#define FROM     "alarm@yalost.me"
+#define TO       "tobymessinger@hotmail.com"
 #define SUBJECT  "You've got mail!"
 #define BODY     "Visit the Rabbit Semiconductor web site.\r\n" \
 	"There you'll find the latest news about Dynamic C."
@@ -49,7 +49,11 @@
  *   This value can be the name or the IP address.
  */
 
-#define SMTP_SERVER "mymailserver.mydomain.com"
+#define SMTP_SERVER "mail.yalost.me"
+//#define SMTP_SERVER "100.42.54.124"
+
+#define SMTP_PORT		26
+
 
 /*
  *   The SMTP_DOMAIN should be the name of your controller.  i.e.
@@ -71,7 +75,7 @@
  *   logging
  */
 
-//#define SMTP_VERBOSE
+#define SMTP_VERBOSE
 
 /*
  *   The USE_SMTP_AUTH macro enables SMTP Authentication, a method
@@ -79,13 +83,13 @@
  *   a message.  Call smtp_setauth() before smtp_sendmail() to set
  *   the username and password to use for authentication.
  */
-//#define USE_SMTP_AUTH
+#define USE_SMTP_AUTH
 
 /*
  *   If the following macro is defined, then if SMTP authentication
  *   fails, the library will NOT attempt non-authenticated SMTP.
  */
-//#define SMTP_AUTH_FAIL_IF_NO_AUTH
+#define SMTP_AUTH_FAIL_IF_NO_AUTH
 
 /********************************
  * End of configuration section *
@@ -103,15 +107,19 @@ void main()
 		tcp_tick(NULL);
 	}
 
-   #if _USER
+//   #if _USER
    	smtp_setserver(SMTP_SERVER);
-   #endif
+//   #endif
 
-#ifdef USE_SMTP_AUTH
-	smtp_setauth ("myusername", "mypassword");
-#endif
+//#ifdef USE_SMTP_AUTH
+	smtp_setauth ("alarm+yalost.me", "Al@rm");
+//#endif
 
-	smtp_sendmail(TO, FROM, SUBJECT, BODY);
+//	smtp_sendmail(TO, FROM, SUBJECT, BODY);
+
+  	smtp_sendmail("i242714@rppkn.com", "alarm@yalost.me",
+   	"You've got rabbit mail!", "Visit the Rabbit Semiconductor web site.\r\n" \
+	"There you'll find the latest news about Dynamic C.");
 
 	while(smtp_mailtick()==SMTP_PENDING)
 		continue;

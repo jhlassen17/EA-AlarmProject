@@ -32,9 +32,9 @@
  * LIB\TCPIP\TCP_CONFIG.LIB for instructions on how to set the
  * configuration.
  *
- *  1 Means DHCP
+ *  3 Means DHCP
  */
-#define TCPCONFIG 1
+#define TCPCONFIG 3
 
 /********************************
  * End of configuration section *
