@@ -31,6 +31,8 @@
  * Pick the predefined TCP/IP configuration for this sample.  See
  * LIB\TCPIP\TCP_CONFIG.LIB for instructions on how to set the
  * configuration.
+ *
+ *  1 Means DHCP
  */
 #define TCPCONFIG 1
 
