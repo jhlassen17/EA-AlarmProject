@@ -28,7 +28,7 @@
 #define HTTP_MAXSERVERS 			1
 #define MAX_TCP_SOCKET_BUFFERS 		2
 #define REDIRECTHOST 				"130.166.150.191"
-#define REDIRECTTO  "http://" REDIRECTHOST "/index.shtml"
+#define REDIRECTTO  "http://" REDIRECTHOST "/index.zhtml"
 #define USE_RABBITWEB 1
 
 #define OS_TASK_CHANGE_PRIO_EN   1
@@ -124,8 +124,12 @@ int 	ledToggle3			(HttpState* state);
 void 	initHttp			();
 void 	initEmails			();
 void 	initStmpMethod		();
+void 	initCarrierDomains();
 
 int     sendEmail			(int email);
+
+int ledToggleAll();
+#web ledToggleAll
 
 /*
  * Zone state
@@ -133,9 +137,21 @@ int     sendEmail			(int email);
  * 		0 -> arm
  */
 int zone0State;
+#web zone0State
 int zone1State;
+#web zone1State
 int zone2State;
+#web zone2State
 int zone3State;
+#web zone3State
+
+//phonenumber and carrier info vars
+char carrierDomains[4][32];
+#web carrierDomains
+int carrierChoice;
+#web carrierChoice
+char phoneNumber[10];
+#web phoneNumber;
 
 char led_LED0[15];
 char led_LED1[15];
@@ -143,39 +159,40 @@ char led_LED2[15];
 char led_LED3[15];
 
 
-#ximport "samples/BL2600/tcpip/pages/ssi.shtml"       index_html
+//#ximport "samples/BL2600/tcpip/pages/ssi.shtml"       index_html
 #ximport "samples/BL2600/tcpip/pages/rabbit1.gif"     rabbit1_gif
 #ximport "samples/BL2600/tcpip/pages/ledon.gif"       ledon_gif
 #ximport "samples/BL2600/tcpip/pages/ledoff.gif"      ledoff_gif
 #ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
 #ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
-#ximport "samples/BL2600/tcpip/ssi.c"                 ssi_c
+// #ximport "samples/BL2600/tcpip/ssi.c"                 ssi_c
+#ximport "samples/BL2600/tcpip/pages/alarm.zhtml" index_zhtml
 
 SSPEC_MIMETABLE_START
-	SSPEC_MIME_FUNC(".shtml", "text/html", shtml_handler),
-	SSPEC_MIME(".html", "text/html"),
+	SSPEC_MIME_FUNC(".zhtml", "text/html", zhtml_handler),
+	SSPEC_MIME(".zhtml", "text/html"),
 	SSPEC_MIME(".gif", "image/gif"),
 	SSPEC_MIME(".cgi", "")
 SSPEC_MIMETABLE_END
 
 
 SSPEC_RESOURCETABLE_START
-	SSPEC_RESOURCE_XMEMFILE("/", index_html),
-	SSPEC_RESOURCE_XMEMFILE("/index.shtml", index_html),
+	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
+	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
 	SSPEC_RESOURCE_XMEMFILE("/showsrc.shtml", showsrc_shtml),
 	SSPEC_RESOURCE_XMEMFILE("/rabbit1.gif", rabbit1_gif),
 	SSPEC_RESOURCE_XMEMFILE("/ledon.gif", ledon_gif),
 	SSPEC_RESOURCE_XMEMFILE("/ledoff.gif", ledoff_gif),
 	SSPEC_RESOURCE_XMEMFILE("/button.gif", button_gif),
-	SSPEC_RESOURCE_XMEMFILE("/ssi.c", ssi_c),
+ //	SSPEC_RESOURCE_XMEMFILE("/ssi.c", ssi_c),
 	SSPEC_RESOURCE_ROOTVAR("led_LED0", led_LED0, PTR16, "%s"),
 	SSPEC_RESOURCE_ROOTVAR("led_LED1", led_LED1, PTR16, "%s"),
 	SSPEC_RESOURCE_ROOTVAR("led_LED2", led_LED2, PTR16, "%s"),
 	SSPEC_RESOURCE_ROOTVAR("led_LED3", led_LED3, PTR16, "%s"),
-	SSPEC_RESOURCE_FUNCTION("/led_LED0.cgi", ledToggle0),
-	SSPEC_RESOURCE_FUNCTION("/led_LED1.cgi", ledToggle1),
-	SSPEC_RESOURCE_FUNCTION("/led_LED2.cgi", ledToggle2),
-	SSPEC_RESOURCE_FUNCTION("/led_LED3.cgi", ledToggle3)
+//	SSPEC_RESOURCE_FUNCTION("/led_LED0.cgi", ledToggle0),
+//	SSPEC_RESOURCE_FUNCTION("/led_LED1.cgi", ledToggle1),
+//	SSPEC_RESOURCE_FUNCTION("/led_LED2.cgi", ledToggle2),
+//	SSPEC_RESOURCE_FUNCTION("/led_LED3.cgi", ledToggle3)
 SSPEC_RESOURCETABLE_END
 
 void initEmails() {
@@ -200,13 +217,30 @@ void initEmails() {
 	emailArray[3].body = "Time to sleep";
 }
 
+// "###@messaging.sprintpcs.com"
+// "###@txt.att.net"
+// "###@vtext.com"
+// "###@tmomail.net"
+void initCarrierDomains() {
+   strcpy(carrierDomains[0],"@txt.att.net");
+   strcpy(carrierDomains[1],"@messaging.sprintpcs.com");
+   strcpy(carrierDomains[2],"@vtext.com");
+   strcpy(carrierDomains[3],"@tmomail.net");
+
+   strcpy(phoneNumber,"9176489840");
+   carrierChoice=2;
+}
+
 int sendEmail(int email) {
 	int result;
+   char fullEmail[50];
    	result = -1;
+   strcpy(fullEmail,phoneNumber);
 
 	smtp_sendmail(
-		emailArray[email].to,
-		emailArray[email].from,
+		//emailArray[email].to,
+      strcat(fullEmail,carrierDomains[carrierChoice]), //check that ph# + choice have values?
+      emailArray[email].from,
    	    emailArray[email].subject,
 		emailArray[email].body);
 
@@ -254,6 +288,11 @@ int ledToggle0(HttpState* state) {
 
 	cgi_redirectto(state, REDIRECTTO);
    	return 0;
+}
+
+int ledToggleAll()
+{
+	//
 }
 
 int ledToggle1(HttpState* state) {
@@ -367,7 +406,10 @@ void httpTask(void *data) {
 
 			// send email
 			if (localZone0 == 0)
+         {
 				sendEmail(0);
+            //digOut(BUZZER_ID);
+         }
 
 			// post the result to queue
 			OSQPost(msgQueuePtr, (void *)&result);
@@ -621,6 +663,7 @@ void main (void) {
 	#endif
 
 	initStmpMethod();
+   initCarrierDomains();
 
 	// start multitasking
     OSInit();
