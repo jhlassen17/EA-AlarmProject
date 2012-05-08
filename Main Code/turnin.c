@@ -29,6 +29,7 @@
 #define MAX_TCP_SOCKET_BUFFERS 		2
 #define REDIRECTHOST 				"130.166.150.191"
 #define REDIRECTTO  "http://" REDIRECTHOST "/index.shtml"
+#define USE_RABBITWEB 1
 
 #define OS_TASK_CHANGE_PRIO_EN   1
 #define OS_TIME_DLY_RESUME_EN 	 1
@@ -94,7 +95,7 @@ typedef struct {
 Email emailArray[4];
 
 #define FROM     	"alarm@yalost.me"
-#define TO       	"ngocchan.nguyen.61@my.csun.edu"
+#define TO       	"9176489840@vtext.com"
 #define SUBJECT  	"You've got mail!"
 #define BODY     	"Visit the Rabbit Semiconductor web site.\r\n" \
 				 	"There you'll find the latest news about Dynamic C."
@@ -507,6 +508,7 @@ void buzzerTask(void* data) {
  		OSSemPend(zone0Sem, 0, &err);
 		if (zone0State == 0) {
 			printf("\nzone 00000000000000000\n");
+         digOut(ID_BUZZER,0);
 		}
         OSSemPost(zone0Sem);
 
@@ -516,6 +518,7 @@ void buzzerTask(void* data) {
  		OSSemPend(zone1Sem, 0, &err);
 		if (zone1State == 0) {
 			printf("\nzone 1111111111111111\n");
+         digOut(ID_BUZZER,0);
 		}
         OSSemPost(zone1Sem);
 
@@ -525,6 +528,7 @@ void buzzerTask(void* data) {
  		OSSemPend(zone2Sem, 0, &err);
 		if (zone2State == 0) {
 			printf("\nzone 22222222222222222\n");
+         digOut(ID_BUZZER,0);
 		}
         OSSemPost(zone2Sem);
 
@@ -534,6 +538,7 @@ void buzzerTask(void* data) {
  		OSSemPend(zone3Sem, 0, &err);
 		if (zone3State == 0) {
 			printf("\nzone 33333333333333333\n");
+         digOut(ID_BUZZER,0);
 		}
         OSSemPost(zone3Sem);
 
