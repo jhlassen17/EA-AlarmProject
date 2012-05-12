@@ -97,10 +97,10 @@
 <label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="10" value="<?z print($phoneNumber) ?>" /><br>
 <label class="labels">Carrier</label>
 <select name="carrierChoice">
-<option value="0" <?z if($carrierChoice == 0) { print("selected='selected'") } ?>>ATT</option>
-<option value="1" <?z if($carrierChoice == 1) { print("selected='selected'") } ?>>Sprint</option>
-<option value="2" <?z if($carrierChoice == 2) { print("selected='selected'") } ?>>Verizon</option>
-<option value="3" <?z if($carrierChoice == 3) { print("selected='selected'") } ?>>T-Mobile</option>
+<option value="0" <?z if($carrierChoice == 0) { ?> selected='selected' <?z } ?>>ATT</option>
+<option value="1" <?z if($carrierChoice == 1) { ?> selected='selected' <?z } ?>>Sprint</option>
+<option value="2" <?z if($carrierChoice == 2) { ?> selected='selected' <?z } ?>>Verizon</option>
+<option value="3" <?z if($carrierChoice == 3) { ?> selected='selected' <?z } ?>>T-Mobile</option>
 </select><br>
 <input type=submit value="Submit" for="userSettings" />
 </form>
