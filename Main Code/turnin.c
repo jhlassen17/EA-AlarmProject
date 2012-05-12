@@ -159,13 +159,11 @@ char led_LED2[15];
 char led_LED3[15];
 
 
-//#ximport "samples/BL2600/tcpip/pages/ssi.shtml"       index_html
-#ximport "samples/BL2600/tcpip/pages/rabbit1.gif"     rabbit1_gif
-#ximport "samples/BL2600/tcpip/pages/ledon.gif"       ledon_gif
-#ximport "samples/BL2600/tcpip/pages/ledoff.gif"      ledoff_gif
-#ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
-#ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
-// #ximport "samples/BL2600/tcpip/ssi.c"                 ssi_c
+//#ximport "samples/BL2600/tcpip/pages/rabbit1.gif"     rabbit1_gif
+//#ximport "samples/BL2600/tcpip/pages/ledon.gif"       ledon_gif
+//#ximport "samples/BL2600/tcpip/pages/ledoff.gif"      ledoff_gif
+//#ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
+//#ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
 #ximport "/alarm.zhtml" index_zhtml
 
 SSPEC_MIMETABLE_START
@@ -179,16 +177,16 @@ SSPEC_MIMETABLE_END
 SSPEC_RESOURCETABLE_START
 	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
 	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
-	SSPEC_RESOURCE_XMEMFILE("/showsrc.shtml", showsrc_shtml),
-	SSPEC_RESOURCE_XMEMFILE("/rabbit1.gif", rabbit1_gif),
-	SSPEC_RESOURCE_XMEMFILE("/ledon.gif", ledon_gif),
-	SSPEC_RESOURCE_XMEMFILE("/ledoff.gif", ledoff_gif),
-	SSPEC_RESOURCE_XMEMFILE("/button.gif", button_gif),
+//	SSPEC_RESOURCE_XMEMFILE("/showsrc.shtml", showsrc_shtml),
+//	SSPEC_RESOURCE_XMEMFILE("/rabbit1.gif", rabbit1_gif),
+//	SSPEC_RESOURCE_XMEMFILE("/ledon.gif", ledon_gif),
+//	SSPEC_RESOURCE_XMEMFILE("/ledoff.gif", ledoff_gif),
+//	SSPEC_RESOURCE_XMEMFILE("/button.gif", button_gif),
  //	SSPEC_RESOURCE_XMEMFILE("/ssi.c", ssi_c),
-	SSPEC_RESOURCE_ROOTVAR("led_LED0", led_LED0, PTR16, "%s"),
-	SSPEC_RESOURCE_ROOTVAR("led_LED1", led_LED1, PTR16, "%s"),
-	SSPEC_RESOURCE_ROOTVAR("led_LED2", led_LED2, PTR16, "%s"),
-	SSPEC_RESOURCE_ROOTVAR("led_LED3", led_LED3, PTR16, "%s"),
+//	SSPEC_RESOURCE_ROOTVAR("led_LED0", led_LED0, PTR16, "%s"),
+//	SSPEC_RESOURCE_ROOTVAR("led_LED1", led_LED1, PTR16, "%s"),
+//	SSPEC_RESOURCE_ROOTVAR("led_LED2", led_LED2, PTR16, "%s"),
+//	SSPEC_RESOURCE_ROOTVAR("led_LED3", led_LED3, PTR16, "%s"),
 //	SSPEC_RESOURCE_FUNCTION("/led_LED0.cgi", ledToggle0),
 //	SSPEC_RESOURCE_FUNCTION("/led_LED1.cgi", ledToggle1),
 //	SSPEC_RESOURCE_FUNCTION("/led_LED2.cgi", ledToggle2),
@@ -268,9 +266,6 @@ int sendEmail(int email) {
 		continue;
 	}
 
-   printf("Phonenumber: %s\n", phoneNumber);
-   printf("Carrier: %s\n", carrierDomains[carrierChoice]);
-
 	// Check to see if the message was sent successfully
 	if (smtp_status() == SMTP_SUCCESS) {
 		printf("\n\rMessage sent\n\r");
@@ -279,6 +274,9 @@ int sendEmail(int email) {
 	else {
 		printf("\n\rError sending the email message\n\r");
 	}
+
+   printf("Phonenumber: %s\n", phoneNumber);
+   printf("Carrier: %s\n", carrierDomains[carrierChoice]);
 
 	return result;
 }
