@@ -75,10 +75,10 @@
 			</tr>
 			<tr>
 				<form id="singleZones" method=POST>
-					<td><label>Disarm 1</label><input type="checkbox" id="zone1"></td>
-					<td><label>Disarm 2</label><input type="checkbox" id="zone2"></td>
-					<td><label>Disarm 3</label><input type="checkbox" id="zone3"></td>
-					<td><label>Disarm 4</label><input type="checkbox" id="zone4"></td>
+					<td><label>Disarm 1</label><input type="checkbox" id="zone1" name="zone0State" <?z if($zone0State == 1) { ?> value='checked'<?z } ?>></td>
+					<td><label>Disarm 2</label><input type="checkbox" id="zone2" name="zone1State" <?z if($zone1State == 1) { ?> value='checked'<?z } ?>></td>
+					<td><label>Disarm 3</label><input type="checkbox" id="zone3" name="zone2State" <?z if($zone2State == 1) { ?> value='checked'<?z } ?>></td>
+					<td><label>Disarm 4</label><input type="checkbox" id="zone4" name="zone3State" <?z if($zone3State == 1) { ?> value='checked'<?z } ?>></td>
 				</tr>
 			</table>
 			<input type="submit" name="individual" for="singleZones">

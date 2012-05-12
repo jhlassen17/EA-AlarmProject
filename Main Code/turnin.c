@@ -12,7 +12,7 @@
 
 #define LED_0_ID	4
 #define LED_1_ID 	5
-#define LED_2_ID  	6
+#define LED_2_ID  6
 #define LED_3_ID 	7
 
 #define ID_SWITCH_1 0
@@ -98,7 +98,7 @@ Email emailArray[4];
 #define TO       	"9176489840@vtext.com"
 #define SUBJECT  	"You've got mail!"
 #define BODY     	"Visit the Rabbit Semiconductor web site.\r\n" \
-				 	"There you'll find the latest news about Dynamic C."
+				 		"There you'll find the latest news about Dynamic C."
 
 /*
  * Message queue data
@@ -109,26 +109,26 @@ void      *msgQueueData[20];
  * Function Prototypes
  */
 int 	isPrime				(int n);
-void 	httpTask			(void *data);
+void 	httpTask				(void *data);
 void 	switchTask			(void *data);
 void 	startTask   		(void *data);
 
 void 	createOtherTasks	();
-void  	checkSwitch         ();
+void  checkSwitch       ();
 
 int 	ledToggle0			(HttpState* state);
 int 	ledToggle1			(HttpState* state);
 int 	ledToggle2			(HttpState* state);
 int 	ledToggle3			(HttpState* state);
 
-void 	initHttp			();
+void 	initHttp				();
 void 	initEmails			();
 void 	initStmpMethod		();
 void 	initCarrierDomains();
 
-int     sendEmail			(int email);
+int   sendEmail			(int email);
 
-int ledToggleAll();
+int   ledToggleAll      ();
 #web ledToggleAll
 
 /*
@@ -213,22 +213,22 @@ void printDelayMsg() {
 void initEmails() {
 	emailArray[0].from = "alarm@yalost.me";
 	emailArray[0].to = TO;
-	emailArray[0].subject = "You've got mail!";
+	emailArray[0].subject = "Alarm Alert!";
 	emailArray[0].body = "Your house just exploded";
 
 	emailArray[1].from = "alarm@yalost.me";
 	emailArray[1].to = TO;
-	emailArray[1].subject = "You've got mail!";
+	emailArray[1].subject = "Alarm Alert!";
 	emailArray[1].body = "Your car is being broken into";
 
 	emailArray[2].from = "alarm@yalost.me";
 	emailArray[2].to = TO;
-	emailArray[2].subject = "You've got mail!";
+	emailArray[2].subject = "Alarm Alert!";
 	emailArray[2].body = "Missle heading toward you!!!";
 
 	emailArray[3].from = "alarm@yalost.me";
 	emailArray[3].to = TO;
-	emailArray[3].subject = "You've got mail!";
+	emailArray[3].subject = "Alarm Alert!";
 	emailArray[3].body = "Time to sleep";
 }
 
@@ -404,10 +404,10 @@ void httpTask(void *data) {
 	int localZone2;
 	int localZone3;
 
-	localZone0 = 1;
-	localZone1 = 1;
-	localZone2 = 1;
-	localZone3 = 1;
+	localZone0 = 0;
+	localZone1 = 0;
+	localZone2 = 0;
+	localZone3 = 0;
 
 	while (1) {
 		printDelayMsg();
@@ -569,7 +569,8 @@ void buzzerTask(void* data) {
  		OSSemPend(zone0Sem, 0, &err);
 		if (zone0State == 0) {
 			printf("\nzone 00000000000000000\n");
-         digOut(ID_BUZZER,0);
+         digOut(ID_BUZZER, 0);
+         digOut(LED_0_ID, 0);
 		}
         OSSemPost(zone0Sem);
 
@@ -579,7 +580,8 @@ void buzzerTask(void* data) {
  		OSSemPend(zone1Sem, 0, &err);
 		if (zone1State == 0) {
 			printf("\nzone 1111111111111111\n");
-         digOut(ID_BUZZER,0);
+         digOut(ID_BUZZER, 0);
+         digOut(LED_1_ID, 0);
 		}
         OSSemPost(zone1Sem);
 
@@ -589,7 +591,8 @@ void buzzerTask(void* data) {
  		OSSemPend(zone2Sem, 0, &err);
 		if (zone2State == 0) {
 			printf("\nzone 22222222222222222\n");
-         digOut(ID_BUZZER,0);
+         digOut(ID_BUZZER, 0);
+         digOut(LED_2_ID, 0);
 		}
         OSSemPost(zone2Sem);
 
@@ -599,7 +602,8 @@ void buzzerTask(void* data) {
  		OSSemPend(zone3Sem, 0, &err);
 		if (zone3State == 0) {
 			printf("\nzone 33333333333333333\n");
-         digOut(ID_BUZZER,0);
+         digOut(ID_BUZZER, 0);
+         digOut(LED_3_ID, 0);
 		}
         OSSemPost(zone3Sem);
 
@@ -621,7 +625,7 @@ void startTask(void *data) {
 void createOtherTasks() {
 	OSTaskCreate(httpTask, NULL, 512, TASK_HTTP_PRIORITY);
 	OSTaskCreate(switchTask, NULL, 512, TASK_SWITCH_PRIORITY);
-	// OSTaskCreate(buzzerTask, NULL, 512, TASK_BUZZER_PRIORITY);
+	OSTaskCreate(buzzerTask, NULL, 512, TASK_BUZZER_PRIORITY);
 }
 
 void initHttp() {
@@ -629,7 +633,7 @@ void initHttp() {
 	brdInit();
 
   	// configure IO channels DIO00 - DIO03 as digital outputs (sinking type outputs)
-   	digOutConfig(0x000F);
+
 
 	// initialize socket
    	sock_init();
@@ -657,14 +661,27 @@ void initStmpMethod() {
 
 }
 
+void turnOffAllLeds() {
+	digOutConfig(0xFFFF);
+	digOut(LED_0_ID, 1);
+   digOut(LED_1_ID, 1);
+   digOut(LED_2_ID, 1);
+   digOut(LED_3_ID, 1);
+}
+
 void main (void) {
-	// initialize uC/OS-II
+	/*
+   	All zones are armed initially
+      	0 = armed
+         1 = disarmed
+	*/
 	zone0State = 0;
 	zone1State = 0;
 	zone2State = 0;
 	zone3State = 0;
 
 	initHttp();
+   turnOffAllLeds();
 
 	// verification for email server
 	#ifdef USE_SMTP_AUTH
