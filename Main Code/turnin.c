@@ -195,6 +195,23 @@ SSPEC_RESOURCETABLE_START
 //	SSPEC_RESOURCE_FUNCTION("/led_LED3.cgi", ledToggle3)
 SSPEC_RESOURCETABLE_END
 
+nodebug void clearScreen() {
+   printf("\x1Bt");            	// Space Opens Window
+}
+
+nodebug void dispStr(int x, int y, char *s) {
+   x += 0x20;
+   y += 0x20;
+   printf ("\x1B=%c%c%s", x, y, s);
+}
+
+void printDelayMsg() {
+	dispStr(5, 5, "|");
+   dispStr(5, 5, "/");
+   dispStr(5, 5, "-");
+   dispStr(5, 5, "\\");
+}
+
 void initEmails() {
 	emailArray[0].from = "viethoang1@juno.com";
 	emailArray[0].to = TO;
@@ -246,6 +263,7 @@ int sendEmail(int email) {
 
 	// Wait until the message has been sent
 	while (smtp_mailtick() == SMTP_PENDING) {
+    	clearScreen();
 		printf("pending ! ! ! ! !\n");
 		continue;
 	}
@@ -394,7 +412,7 @@ void httpTask(void *data) {
 	localZone3 = 1;
 
 	while (1) {
-		printf(".");
+		printDelayMsg();
 
 		// interact with the web
 		http_handler();
@@ -606,16 +624,6 @@ void createOtherTasks() {
 	OSTaskCreate(httpTask, NULL, 512, TASK_HTTP_PRIORITY);
 	OSTaskCreate(switchTask, NULL, 512, TASK_SWITCH_PRIORITY);
 	// OSTaskCreate(buzzerTask, NULL, 512, TASK_BUZZER_PRIORITY);
-}
-
-nodebug void ClearScreen() {
-   	printf( "\x1Bt" );            	// Space Opens Window
-}
-
-nodebug void DispStr(int x, int y, char *s) {
-	x += 0x20;
-   	y += 0x20;
-   	printf("\x1B=%c%c%s", x, y, s);
 }
 
 void initHttp() {
