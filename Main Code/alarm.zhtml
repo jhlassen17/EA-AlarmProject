@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<title>Alarm Monitor</title>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
 		<style type="text/css">
 
 .labels {
@@ -69,24 +69,49 @@
 			<th>Zone 3</th>
 			<th>Zone 4</th>
 			<tr><!-- PICTURES -->
+				<td><div id="zone0pic" class="pic"></div></td>
 				<td><div id="zone1pic" class="pic"></div></td>
 				<td><div id="zone2pic" class="pic"></div></td>
 				<td><div id="zone3pic" class="pic"></div></td>
-				<td><div id="zone4pic" class="pic"></div></td>
 			</tr>
 			<tr>
 				<form id="singleZones" method=POST>
-					<td><label>Disarm 1</label><input type="checkbox" id="zone1" name="zone0State" <?z if($zone0State == 1) { ?> value='checked'<?z } ?>></td>
-					<td><label>Disarm 2</label><input type="checkbox" id="zone2" name="zone1State" <?z if($zone1State == 1) { ?> value='checked'<?z } ?>></td>
-					<td><label>Disarm 3</label><input type="checkbox" id="zone3" name="zone2State" <?z if($zone2State == 1) { ?> value='checked'<?z } ?>></td>
-					<td><label>Disarm 4</label><input type="checkbox" id="zone4" name="zone3State" <?z if($zone3State == 1) { ?> value='checked'<?z } ?>></td>
+					<td>
+						<select name="zone0State">
+							<option value="0" <?z if($zone0State == 0) { ?> selected='selected'<?z } ?>>Armed</option>
+							<option value="1" <?z if($zone0State == 1) { ?> selected='selected'<?z } ?>>Disarmed</option>
+						</select>
+					</td>
+					<td>
+						<select name="zone1State">
+							<option value="0" <?z if($zone1State == 0) { ?> selected='selected'<?z } ?>>Armed</option>
+							<option value="1" <?z if($zone1State == 1) { ?> selected='selected'<?z } ?>>Disarmed</option>
+						</select>
+					</td>
+					<td>
+						<select name="zone2State">
+							<option value="0" <?z if($zone2State == 0) { ?> selected='selected'<?z } ?>>Armed</option>
+							<option value="1" <?z if($zone2State == 1) { ?> selected='selected'<?z } ?>>Disarmed</option>
+						</select>
+					</td>
+					<td> 
+						<select name="zone3State">
+							<option value="0" <?z if($zone3State == 0) { ?> selected='selected'<?z } ?>>Armed</option>
+							<option value="1" <?z if($zone3State == 1) { ?> selected='selected'<?z } ?>>Disarmed</option>
+						</select>
+					</td>
 				</tr>
 			</table>
 			<input type="submit" name="individual" for="singleZones">
 		</form>
 
-		<form>
-			<input type="submit" name="bypass" value="Bypass All">
+		<form action="post">
+			<input type="hidden" name="zone0Alarm" value="0" />
+			<input type="hidden" name="zone1Alarm" value="0" />
+			<input type="hidden" name="zone2Alarm" value="0" />
+			<input type="hidden" name="zone3Alarm" value="0" />
+			<input type="hidden" name="alarming" value="0" />
+			<input type="submit" name="bypass" value="Bypass All" />
 		</form>
 		<form>
 			<input type="submit" name="arm" value="Arm All">

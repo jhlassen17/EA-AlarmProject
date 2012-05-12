@@ -2,8 +2,8 @@
 #class auto
 
 // MACROS for the LED's
-#define ON     1
-#define OFF    0
+#define ON     0
+#define OFF    1
 
 #define LED0   0
 #define LED1   1
@@ -145,6 +145,22 @@ int zone2State;
 int zone3State;
 #web zone3State
 
+/*
+ * Zone alarm state
+ * 		1 -> ok
+ * 		0 -> alarming
+ */
+int zone0Alarm;
+#web zone0Alarm
+int zone1Alarm;
+#web zone1Alarm
+int zone2Alarm;
+#web zone2Alarm
+int zone3Alarm;
+#web zone3Alarm
+int alarming;
+#web alarming
+
 //phonenumber and carrier info vars
 char carrierDomains[4][32];
 #web carrierDomains
@@ -157,6 +173,9 @@ char led_LED0[15];
 char led_LED1[15];
 char led_LED2[15];
 char led_LED3[15];
+
+int pushed;
+
 
 
 //#ximport "samples/BL2600/tcpip/pages/rabbit1.gif"     rabbit1_gif
@@ -281,7 +300,7 @@ int sendEmail(int email) {
 	return result;
 }
 
-
+/*
 
 int ledToggle0(HttpState* state) {
 	INT8U err;
@@ -380,14 +399,14 @@ int ledToggle3(HttpState* state) {
 
 		// take the fucking semaphore
  		OSSemPend(zone3Sem, 0, &err);
-			zone3State = 0;
+			zone3State = ON;
 			printf("led_LED3: ON");
         OSSemPost(zone3Sem);
    }
 
    cgi_redirectto(state,REDIRECTTO);
    return 0;
-}
+} */
 
 /**
  *  Run the HTTP server in the background
@@ -404,13 +423,16 @@ void httpTask(void *data) {
 	int localZone2;
 	int localZone3;
 
-	localZone0 = 0;
-	localZone1 = 0;
-	localZone2 = 0;
-	localZone3 = 0;
+	localZone0 = ON;
+	localZone1 = ON;
+	localZone2 = ON;
+	localZone3 = ON;
 
 	while (1) {
 		printDelayMsg();
+
+      // turn off
+
 
 		// interact with the web
 		http_handler();
@@ -424,10 +446,9 @@ void httpTask(void *data) {
         	OSSemPost(zone0Sem);
 
 			// send email
-			if (localZone0 == 0)
+			if (localZone0 == ON)
          {
-				sendEmail(0);
-            //digOut(BUZZER_ID);
+         	pushed = 0;
          }
 
 			// post the result to queue
@@ -446,8 +467,11 @@ void httpTask(void *data) {
         	OSSemPost(zone1Sem);
 
 			// send email
-			if (localZone1 == 0)
-				sendEmail(1);
+			if (localZone1 == ON)
+         {
+         	pushed = 1;
+				//sendEmail(1);
+         }
 
 			// post the result to queue
 			OSQPost(msgQueuePtr, (void *)&result);
@@ -465,8 +489,11 @@ void httpTask(void *data) {
         	OSSemPost(zone2Sem);
 
 			// send email
-			if (localZone2 == 0)
-				sendEmail(2);
+			if (localZone2 == ON)
+			{
+         	pushed = 2;
+         	//sendEmail(2);
+         }
 
 			// post the result to queue
 			OSQPost(msgQueuePtr, (void *)&result);
@@ -484,8 +511,11 @@ void httpTask(void *data) {
         	OSSemPost(zone3Sem);
 
 			// send email
-			if (localZone3 == 0)
-				sendEmail(3);
+			if (localZone3 == ON)
+         {
+         	pushed = 3;
+				//sendEmail(3);
+         }
 
 			// post the result to queue
 			OSQPost(msgQueuePtr, (void *)&result);
@@ -497,6 +527,15 @@ void httpTask(void *data) {
 		else {
 
 		}
+
+      if(alarming == OFF)
+      {
+			digOut(ID_BUZZER, OFF);
+         digOut(LED_0_ID, OFF);
+         digOut(LED_1_ID, OFF);
+         digOut(LED_2_ID, OFF);
+         digOut(LED_3_ID, OFF);
+      }
 	}
 
 }
@@ -524,7 +563,7 @@ void switchTask(void *data) {
 		switch (*result) {
 			case ID_SWITCH_1:
 				OSSemPend(zone0Sem, 0, &err);
-				if (zone0State == 0) {
+				if (zone0State == ON) {
 					printf("\nzone 000 \n");
 				}
 				OSSemPost(zone0Sem);
@@ -532,7 +571,7 @@ void switchTask(void *data) {
 
 			case ID_SWITCH_2:
 				OSSemPend(zone1Sem, 0, &err);
-				if (zone1State == 0) {
+				if (zone1State == ON) {
 					printf("\nzone 111 \n");
 				}
 				OSSemPost(zone1Sem);
@@ -540,7 +579,7 @@ void switchTask(void *data) {
 
 			case ID_SWITCH_3:
 				OSSemPend(zone2Sem, 0, &err);
-				if (zone2State == 0) {
+				if (zone2State == ON) {
 					printf("\nzone 222 \n");
 				}
 				OSSemPost(zone2Sem);
@@ -548,7 +587,7 @@ void switchTask(void *data) {
 
 			case ID_SWITCH_4:
 				OSSemPend(zone3Sem, 0, &err);
-				if (zone3State == 0) {
+				if (zone3State == ON) {
 					printf("\nzone 333 \n");
 				}
 				OSSemPost(zone3Sem);
@@ -567,10 +606,12 @@ void buzzerTask(void* data) {
 		 * Zone 1 check
 		 */
  		OSSemPend(zone0Sem, 0, &err);
-		if (zone0State == 0) {
+		if (zone0State == ON && pushed == 0) {
 			printf("\nzone 00000000000000000\n");
-         digOut(ID_BUZZER, 0);
-         digOut(LED_0_ID, 0);
+         digOut(ID_BUZZER, ON);
+         digOut(LED_0_ID, ON);
+         zone0Alarm = ON;
+         alarming = ON;
 		}
         OSSemPost(zone0Sem);
 
@@ -578,10 +619,12 @@ void buzzerTask(void* data) {
 		 * Zone 2 check
 		 */
  		OSSemPend(zone1Sem, 0, &err);
-		if (zone1State == 0) {
+		if (zone1State == ON && pushed == 1) {
 			printf("\nzone 1111111111111111\n");
-         digOut(ID_BUZZER, 0);
-         digOut(LED_1_ID, 0);
+         digOut(ID_BUZZER, ON);
+         digOut(LED_1_ID, ON);
+         zone1Alarm = ON;
+         alarming = ON;
 		}
         OSSemPost(zone1Sem);
 
@@ -589,10 +632,12 @@ void buzzerTask(void* data) {
 		 * Zone 3 check
 		 */
  		OSSemPend(zone2Sem, 0, &err);
-		if (zone2State == 0) {
+		if (zone2State == ON && pushed == 2) {
 			printf("\nzone 22222222222222222\n");
-         digOut(ID_BUZZER, 0);
-         digOut(LED_2_ID, 0);
+         digOut(ID_BUZZER, ON);
+         digOut(LED_2_ID, ON);
+         zone2Alarm = ON;
+         alarming = ON;
 		}
         OSSemPost(zone2Sem);
 
@@ -600,12 +645,24 @@ void buzzerTask(void* data) {
 		 * Zone 4 check
 		 */
  		OSSemPend(zone3Sem, 0, &err);
-		if (zone3State == 0) {
+		if (zone3State == ON && pushed == 3) {
 			printf("\nzone 33333333333333333\n");
-         digOut(ID_BUZZER, 0);
-         digOut(LED_3_ID, 0);
+         digOut(ID_BUZZER, ON);
+         digOut(LED_3_ID, ON);
+         zone3Alarm = ON;
+         alarming = ON;
 		}
         OSSemPost(zone3Sem);
+
+        //Send email
+        if(pushed > -1)
+        {
+	 		  sendEmail(pushed);
+        }
+
+        //Reset for next button push
+	     pushed = -1;
+
 
 		// now leave the buzzer
 		OSTaskChangePrio(TASK_LOWEST_PRIORITY, TASK_BUZZER_PRIORITY);
@@ -650,10 +707,10 @@ void initHttp() {
    	tcp_reserveport(80);
 
    	// set the initial state of the LED's
-   	strcpy(led_LED0, "ledon.gif");
+   	/*strcpy(led_LED0, "ledon.gif");
    	strcpy(led_LED1, "ledon.gif");
    	strcpy(led_LED2, "ledon.gif");
-   	strcpy(led_LED3, "ledon.gif");
+   	strcpy(led_LED3, "ledon.gif");*/
 }
 
 void initStmpMethod() {
@@ -662,11 +719,11 @@ void initStmpMethod() {
 }
 
 void turnOffAllLeds() {
-	digOutConfig(0xFFFF);
-	digOut(LED_0_ID, 1);
-   digOut(LED_1_ID, 1);
-   digOut(LED_2_ID, 1);
-   digOut(LED_3_ID, 1);
+	digOutConfig(0x01F0);
+	digOut(LED_0_ID, OFF);
+   digOut(LED_1_ID, OFF);
+   digOut(LED_2_ID, OFF);
+   digOut(LED_3_ID, OFF);
 }
 
 void main (void) {
@@ -675,11 +732,18 @@ void main (void) {
       	0 = armed
          1 = disarmed
 	*/
-	zone0State = 0;
-	zone1State = 0;
-	zone2State = 0;
-	zone3State = 0;
+	zone0State = ON;
+	zone1State = ON;
+	zone2State = ON;
+	zone3State = ON;
+   zone0Alarm = OFF;
+	zone1Alarm = OFF;
+	zone2Alarm = OFF;
+	zone3Alarm = OFF;
+   alarming = OFF;
+   pushed = -1;
 
+   brdInit();
 	initHttp();
    turnOffAllLeds();
 
