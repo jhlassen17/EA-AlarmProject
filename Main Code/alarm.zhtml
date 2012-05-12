@@ -94,7 +94,7 @@
 <!-- <form id="userSettings" action="??????"> -->
 <form id="userSettings" method="post">
 	<!--need to send the user's number and carrier choice back to server-->
-<label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="10" value="<?z print($phoneNumber) ?>" /><br>
+<label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="11" value="<?z print($phoneNumber) ?>" /><br>
 <label class="labels">Carrier</label>
 <select name="carrierChoice">
 <option value="0" <?z if($carrierChoice == 0) { ?> selected='selected' <?z } ?>>ATT</option>
