@@ -105,19 +105,26 @@
 			<input type="submit" name="individual" for="singleZones">
 		</form>
 
+		<!-- Bypass All Code -->
 		<form action="post">
-			<input type="hidden" name="zone0Alarm" value="0" />
-			<input type="hidden" name="zone1Alarm" value="0" />
-			<input type="hidden" name="zone2Alarm" value="0" />
-			<input type="hidden" name="zone3Alarm" value="0" />
-			<input type="hidden" name="alarming" value="0" />
+			<input type="hidden" name="zone0Alarm" value="1" />
+			<input type="hidden" name="zone1Alarm" value="1" />
+			<input type="hidden" name="zone2Alarm" value="1" />
+			<input type="hidden" name="zone3Alarm" value="1" />
+			<input type="hidden" name="alarming" value="1" />
 			<input type="submit" name="bypass" value="Bypass All" />
 		</form>
+		
+		<!-- Arm All Code -->
 		<form>
+			<input type="hidden" name="zone0State" value="0" />
+			<input type="hidden" name="zone1State" value="0" />
+			<input type="hidden" name="zone2State" value="0" />
+			<input type="hidden" name="zone3State" value="0" />
 			<input type="submit" name="arm" value="Arm All">
 		</form>
 		<div id="settings">
-<!-- <form id="userSettings" action="??????"> -->
+
 <form id="userSettings" method="post">
 	<!--need to send the user's number and carrier choice back to server-->
 <label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="11" value="<?z print($phoneNumber) ?>" /><br>
