@@ -213,24 +213,24 @@ void printDelayMsg() {
 }
 
 void initEmails() {
-	emailArray[0].from = "viethoang1@juno.com";
+	emailArray[0].from = "alarm@yalost.me";
 	emailArray[0].to = TO;
-	emailArray[0].subject = "Self-Test status OK!!!";
+	emailArray[0].subject = "You've got mail!";
 	emailArray[0].body = "Your house just exploded";
 
-	emailArray[1].from = "viethoang1@juno.com";
+	emailArray[1].from = "alarm@yalost.me";
 	emailArray[1].to = TO;
-	emailArray[1].subject = "Self-Test failed.";
+	emailArray[1].subject = "You've got mail!";
 	emailArray[1].body = "Your car is being broken into";
 
-	emailArray[2].from = "viethoang1@juno.com";
+	emailArray[2].from = "alarm@yalost.me";
 	emailArray[2].to = TO;
-	emailArray[2].subject = "System shut down";
+	emailArray[2].subject = "You've got mail!";
 	emailArray[2].body = "Missle heading toward you!!!";
 
-	emailArray[3].from = "viethoang1@juno.com";
+	emailArray[3].from = "alarm@yalost.me";
 	emailArray[3].to = TO;
-	emailArray[3].subject = "System malfunction";
+	emailArray[3].subject = "You've got mail!";
 	emailArray[3].body = "Time to sleep";
 }
 
@@ -686,7 +686,6 @@ void main (void) {
 		OSTaskCreate(startTask, NULL, 512, TASK_START_PRIORITY);
     OSStart();
 }
-
 
 
 
