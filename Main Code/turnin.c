@@ -150,7 +150,7 @@ char carrierDomains[4][32];
 #web carrierDomains
 int carrierChoice;
 #web carrierChoice
-char phoneNumber[10];
+char phoneNumber[16];
 #web phoneNumber;
 
 char led_LED0[15];
@@ -166,7 +166,7 @@ char led_LED3[15];
 #ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
 #ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
 // #ximport "samples/BL2600/tcpip/ssi.c"                 ssi_c
-#ximport "samples/BL2600/tcpip/pages/alarm.zhtml" index_zhtml
+#ximport "/alarm.zhtml" index_zhtml
 
 SSPEC_MIMETABLE_START
 	SSPEC_MIME_FUNC(".zhtml", "text/html", zhtml_handler),
@@ -249,6 +249,9 @@ int sendEmail(int email) {
 		printf("pending ! ! ! ! !\n");
 		continue;
 	}
+
+   printf("Phonenumber: %s\n", phoneNumber);
+   printf("Carrier: %s\n", carrierDomains[carrierChoice]);
 
 	// Check to see if the message was sent successfully
 	if (smtp_status() == SMTP_SUCCESS) {
@@ -391,7 +394,7 @@ void httpTask(void *data) {
 	localZone3 = 1;
 
 	while (1) {
-		printf("..................\n");
+		printf(".");
 
 		// interact with the web
 		http_handler();
