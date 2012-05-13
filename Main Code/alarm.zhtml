@@ -114,6 +114,7 @@
 <input type=submit value="Submit" for="userSettings" />
 </form>
 </div>
+<!--
 <script language="javascript">
 	
 handleError = function(){
@@ -179,7 +180,7 @@ update = function() {
 };
 
 $(update);
-</script>
+</script> -->
 	</body>
 </html>
 
