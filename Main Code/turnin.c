@@ -1,49 +1,55 @@
 // Change default storage class for local variables: on the stack
 #class auto
 
-// MACROS for the LED's
+// Define State
 #define ON     0
 #define OFF    1
 
+//
 #define LED0   0
 #define LED1   1
 #define LED2   2
 #define LED3   3
 
+// PIN IDs for the LEDs
 #define LED_0_ID	4
 #define LED_1_ID 	5
 #define LED_2_ID  6
 #define LED_3_ID 	7
 
+// PIN IDs for the Switches
 #define ID_SWITCH_1 0
 #define ID_SWITCH_2 1
 #define ID_SWITCH_3 2
 #define ID_SWITCH_4 3
 
+// PIN ID for the Buzzer
 #define ID_BUZZER 8
 
 
+// TCP / HTTP Config
 #define TCPCONFIG 					3
 #define TCP_BUF_SIZE 				2048
 #define HTTP_MAXSERVERS 			1
-#define MAX_TCP_SOCKET_BUFFERS 		2
-#define REDIRECTHOST 				"130.166.150.191"
-#define REDIRECTTO  "http://" REDIRECTHOST "/index.zhtml"
+#define MAX_TCP_SOCKET_BUFFERS 		3
+// #define REDIRECTHOST 				"130.166.150.191"
+// #define REDIRECTTO  "http://" REDIRECTHOST "/index.zhtml"
 #define USE_RABBITWEB 1
 
+// RTOS Settings
 #define OS_TASK_CHANGE_PRIO_EN   1
 #define OS_TIME_DLY_RESUME_EN 	 1
 #define OS_SEM_EN 				 1
-
 #define OS_MAX_EVENTS			 6
+#define MSG_QUEUE_SIZE     		 20
 
+// RTOS Priorities
 #define TASK_START_PRIORITY      10
 #define TASK_HTTP_PRIORITY		 15
 #define TASK_SWITCH_PRIORITY   	 12
 #define TASK_BUZZER_PRIORITY     17
 #define TASK_LOWEST_PRIORITY	 9
 
-#define MSG_QUEUE_SIZE     		 20
 
 #define SMTP_SERVER "mail.yalost.me"
 //#define SMTP_SERVER "100.42.54.124"
@@ -184,6 +190,7 @@ int pushed;
 //#ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
 //#ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
 #ximport "/alarm.zhtml" index_zhtml
+#ximport "/zones.zhtml" zones_zhtml
 
 SSPEC_MIMETABLE_START
 	SSPEC_MIME_FUNC(".zhtml", "text/html", zhtml_handler),
@@ -196,20 +203,7 @@ SSPEC_MIMETABLE_END
 SSPEC_RESOURCETABLE_START
 	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
 	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
-//	SSPEC_RESOURCE_XMEMFILE("/showsrc.shtml", showsrc_shtml),
-//	SSPEC_RESOURCE_XMEMFILE("/rabbit1.gif", rabbit1_gif),
-//	SSPEC_RESOURCE_XMEMFILE("/ledon.gif", ledon_gif),
-//	SSPEC_RESOURCE_XMEMFILE("/ledoff.gif", ledoff_gif),
-//	SSPEC_RESOURCE_XMEMFILE("/button.gif", button_gif),
- //	SSPEC_RESOURCE_XMEMFILE("/ssi.c", ssi_c),
-//	SSPEC_RESOURCE_ROOTVAR("led_LED0", led_LED0, PTR16, "%s"),
-//	SSPEC_RESOURCE_ROOTVAR("led_LED1", led_LED1, PTR16, "%s"),
-//	SSPEC_RESOURCE_ROOTVAR("led_LED2", led_LED2, PTR16, "%s"),
-//	SSPEC_RESOURCE_ROOTVAR("led_LED3", led_LED3, PTR16, "%s"),
-//	SSPEC_RESOURCE_FUNCTION("/led_LED0.cgi", ledToggle0),
-//	SSPEC_RESOURCE_FUNCTION("/led_LED1.cgi", ledToggle1),
-//	SSPEC_RESOURCE_FUNCTION("/led_LED2.cgi", ledToggle2),
-//	SSPEC_RESOURCE_FUNCTION("/led_LED3.cgi", ledToggle3)
+  	SSPEC_RESOURCE_XMEMFILE("/zones.zhtml", zones_zhtml)
 SSPEC_RESOURCETABLE_END
 
 nodebug void clearScreen() {

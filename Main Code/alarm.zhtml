@@ -18,38 +18,6 @@
 				background-color:green;
 			}
 			
-			.zone1pic {
-				background-color:<?z if( $zone0State == 0 ) { ?>
-					green;
-					<?z  } else { ?>
-					blue;
-					<?z } ?>
-			}
-			
-			.zone2pic {
-				background-color:<?z if( $zone1State == 0 ) { ?>
-					blue;
-					<?z  } else { ?>
-					red;
-					<?z } ?>
-			}
-			
-			.zone3pic {
-				background-color:<?z if( $zone2State == 0 ) { ?>
-					green;
-					<?z  } else { ?>
-					blue;
-					<?z } ?>
-			}
-			
-			.zone4pic {
-				background-color:<?z if( $zone3State == 0 ) { ?>
-					green;
-					<?z  } else { ?>
-					blue;
-					<?z } ?>
-			}
-			
 			body {
 				margin: 0 auto;
 				text-align:center;
@@ -146,6 +114,72 @@
 <input type=submit value="Submit" for="userSettings" />
 </form>
 </div>
+<script language="javascript">
+	
+handleError = function(){
+	//handle the error
+	setTimeout(update, 500);
+};
+
+handleUpdate = function(data){
+	//handle the update by changing the div colors
+	//based off of what data retuned
+	//data is csv of zone statuses, like zone0State, zone0Alarm, zone1State, zone1Alarm...
+	var zones = data.split(","); //now zones is an array of the values
+
+	//zone0pic, zone1pic, zone2pic, zone3pic are the 4 divs for the zones
+	if (zone0State === 1){
+		$('#zone0pic').css('backgroundcolor', 'blue');
+	}
+	else if (zone0Alarm === 0){
+		$('#zone0pic').css('backgroundcolor', 'red');
+	}
+	else 
+		$('#zone0pic').css('backgroundcolor', 'green');
+
+if (zone1State === 1){
+		$('#zone1pic').css('backgroundcolor', 'blue');
+	}
+	else if (zone1Alarm === 0){
+		$('#zone1pic').css('backgroundcolor', 'red');
+	}
+	else 
+		$('#zone1pic').css('backgroundcolor', 'green');
+
+
+	if (zone2State === 1){
+		$('#zone2pic').css('backgroundcolor', 'blue');
+	}
+	else if (zone2Alarm === 0){
+		$('#zone2pic').css('backgroundcolor', 'red');
+	}
+	else 
+		$('#zone2pic').css('backgroundcolor', 'green');
+
+
+	if (zone3State === 1){
+		$('#zone0pic').css('backgroundcolor', 'blue');
+	}
+	else if (zone3Alarm === 0){
+		$('#zone3pic').css('backgroundcolor', 'red');
+	}
+	else 
+		$('#zone3pic').css('backgroundcolor', 'green');
+
+
+	setTimeout(update, 500);
+};
+
+update = function() {
+	$.ajax({
+		url:"/zones.zhtml",
+		success:handleUpdate,
+		error:handleError
+		});
+};
+
+$(update);
+</script>
 	</body>
 </html>
 
