@@ -110,6 +110,7 @@
 <option value="1" <?z if($carrierChoice == 1) { ?> selected='selected'<?z } ?>>Sprint</option>
 <option value="2" <?z if($carrierChoice == 2) { ?> selected='selected'<?z } ?>>Verizon</option>
 <option value="3" <?z if($carrierChoice == 3) { ?> selected='selected'<?z } ?>>T-Mobile</option>
+<option value="4" <?z if($carrierChoice == 4) { ?> selected='selected'<?z } ?>>Test</option>
 </select><br>
 <input type=submit value="Submit" for="userSettings" />
 </form>
