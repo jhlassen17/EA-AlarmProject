@@ -29,41 +29,31 @@
 
 // TCP / HTTP Config
 #define TCPCONFIG 					3
-#define TCP_BUF_SIZE 				2048
+#define TCP_BUF_SIZE 				4096
 #define HTTP_MAXSERVERS 			1
-#define MAX_TCP_SOCKET_BUFFERS 		3
-// #define REDIRECTHOST 				"130.166.150.191"
-// #define REDIRECTTO  "http://" REDIRECTHOST "/index.zhtml"
+#define MAX_TCP_SOCKET_BUFFERS 		10
 #define USE_RABBITWEB 1
 
 // RTOS Settings
 #define OS_TASK_CHANGE_PRIO_EN   1
 #define OS_TIME_DLY_RESUME_EN 	 1
 #define OS_SEM_EN 				 1
-#define OS_MAX_EVENTS			 6
-#define MSG_QUEUE_SIZE     		 20
+#define OS_MAX_EVENTS			 8
+#define MSG_QUEUE_SIZE     		 25
 
-// RTOS Priorities
+// RTOS Priorities, Higher # means lower priority
 #define TASK_START_PRIORITY      10
 #define TASK_HTTP_PRIORITY		 15
 #define TASK_SWITCH_PRIORITY   	 12
 #define TASK_BUZZER_PRIORITY     17
-#define TASK_LOWEST_PRIORITY	 9
+#define TASK_HIGHEST_PRIORITY	 9
 
 
 #define SMTP_SERVER "mail.yalost.me"
-//#define SMTP_SERVER "100.42.54.124"
-
 #define SMTP_PORT		26
-
-//#define SMTP_SERVER 			 "64.136.44.45"
-
 #define USE_SMTP_AUTH
-
-#define SMTP_VERBOSE
-
-#define SMTP_DEBUG
-
+//#define SMTP_VERBOSE
+//#define SMTP_DEBUG
 #define SMTP_AUTH_FAIL_IF_NO_AUTH
 
 
@@ -84,6 +74,7 @@ OS_EVENT  *zone0Sem;
 OS_EVENT  *zone1Sem;
 OS_EVENT  *zone2Sem;
 OS_EVENT  *zone3Sem;
+OS_EVENT  *pushedSem;
 
 /*
  * The structure that holds an email message
@@ -109,7 +100,7 @@ Email emailArray[4];
 /*
  * Message queue data
  */
-void      *msgQueueData[20];
+void      *msgQueueData[25];
 
 /*
  * Function Prototypes
@@ -122,20 +113,12 @@ void 	startTask   		(void *data);
 void 	createOtherTasks	();
 void  checkSwitch       ();
 
-int 	ledToggle0			(HttpState* state);
-int 	ledToggle1			(HttpState* state);
-int 	ledToggle2			(HttpState* state);
-int 	ledToggle3			(HttpState* state);
-
 void 	initHttp				();
 void 	initEmails			();
 void 	initStmpMethod		();
 void 	initCarrierDomains();
 
 int   sendEmail			(int email);
-
-int   ledToggleAll      ();
-#web ledToggleAll
 
 /*
  * Zone state
@@ -175,23 +158,14 @@ int carrierChoice;
 char phoneNumber[16];
 #web phoneNumber;
 
-char led_LED0[15];
-char led_LED1[15];
-char led_LED2[15];
-char led_LED3[15];
-
+//
 int pushed;
 
-
-
-//#ximport "samples/BL2600/tcpip/pages/rabbit1.gif"     rabbit1_gif
-//#ximport "samples/BL2600/tcpip/pages/ledon.gif"       ledon_gif
-//#ximport "samples/BL2600/tcpip/pages/ledoff.gif"      ledoff_gif
-//#ximport "samples/BL2600/tcpip/pages/button.gif"      button_gif
-//#ximport "samples/BL2600/tcpip/pages/showsrc.shtml"   showsrc_shtml
+// Web Pages
 #ximport "/alarm.zhtml" index_zhtml
 #ximport "/zones.zhtml" zones_zhtml
 
+// Web MIME
 SSPEC_MIMETABLE_START
 	SSPEC_MIME_FUNC(".zhtml", "text/html", zhtml_handler),
 	SSPEC_MIME(".zhtml", "text/html"),
@@ -260,17 +234,27 @@ void initCarrierDomains() {
 }
 
 int sendEmail(int email) {
-	int result;
+	// Full email address
    char fullEmail[50];
-   	result = -1;
+
+
+   if(email < 0 )
+   {
+   	printf("Now you done fucked up son.");
+   	 return -1;
+   }
+
+   //Copy the phone numner
    strcpy(fullEmail,phoneNumber);
 
+   // Send the email
 	smtp_sendmail(
 		//emailArray[email].to,
       strcat(fullEmail,carrierDomains[carrierChoice]), //check that ph# + choice have values?
       emailArray[email].from,
    	    emailArray[email].subject,
 		emailArray[email].body);
+
 
 	// Wait until the message has been sent
 	while (smtp_mailtick() == SMTP_PENDING) {
@@ -282,7 +266,6 @@ int sendEmail(int email) {
 	// Check to see if the message was sent successfully
 	if (smtp_status() == SMTP_SUCCESS) {
 		printf("\n\rMessage sent\n\r");
-		result = 0;
 	}
 	else {
 		printf("\n\rError sending the email message\n\r");
@@ -291,116 +274,8 @@ int sendEmail(int email) {
    printf("Phonenumber: %s\n", phoneNumber);
    printf("Carrier: %s\n", carrierDomains[carrierChoice]);
 
-	return result;
+	return 0;
 }
-
-/*
-
-int ledToggle0(HttpState* state) {
-	INT8U err;
-	if (strcmp(led_LED0, "ledon.gif") == 0) {
-    	strcpy(led_LED0, "ledoff.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone0Sem, 0, &err);
-      		// digOut(LED_0_ID, 1);
-			zone0State = 1;
-			printf("led_LED0: OFF");
-        OSSemPost(zone0Sem);
-   	}
-   	else {
-      	strcpy(led_LED0, "ledon.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone0Sem, 0, &err);
-			zone0State = 0;
-			printf("led_LED0: ON");
-        OSSemPost(zone0Sem);
-   	}
-
-	cgi_redirectto(state, REDIRECTTO);
-   	return 0;
-}
-
-int ledToggleAll()
-{
-	//
-}
-
-int ledToggle1(HttpState* state) {
-	INT8U err;
-	if (strcmp(led_LED1, "ledon.gif") == 0) {
-      	strcpy(led_LED1, "ledoff.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone1Sem, 0, &err);
-			zone1State = 1;
-			printf("led_LED1: OFF");
-        OSSemPost(zone1Sem);
-   	}
-   	else {
-		strcpy(led_LED1, "ledon.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone1Sem, 0, &err);
-			zone1State = 0;
-			printf("led_LED1: ON");
-        OSSemPost(zone1Sem);
-   	}
-
-	cgi_redirectto(state,REDIRECTTO);
-   	return 0;
-}
-
-int ledToggle2(HttpState* state) {
-	INT8U err;
-   	if (strcmp(led_LED2, "ledon.gif") == 0) {
-      	strcpy(led_LED2, "ledoff.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone2Sem, 0, &err);
-			zone2State = 1;
-			printf("led_LED2: OFF");
-        OSSemPost(zone2Sem);
-   	}
-   	else {
-      	strcpy(led_LED2, "ledon.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone2Sem, 0, &err);
-			zone2State = 0;
-			printf("led_LED2: ON");
-        OSSemPost(zone2Sem);
-   }
-
-   cgi_redirectto(state, REDIRECTTO);
-   return 0;
-}
-
-int ledToggle3(HttpState* state) {
-	INT8U err;
-   	if (strcmp(led_LED3, "ledon.gif") == 0) {
-      	strcpy(led_LED3, "ledoff.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone3Sem, 0, &err);
-			zone3State = 1;
-			printf("led_LED3: OFF");
-        OSSemPost(zone3Sem);
-   }
-   else {
-      	strcpy(led_LED3,"ledon.gif");
-
-		// take the fucking semaphore
- 		OSSemPend(zone3Sem, 0, &err);
-			zone3State = ON;
-			printf("led_LED3: ON");
-        OSSemPost(zone3Sem);
-   }
-
-   cgi_redirectto(state,REDIRECTTO);
-   return 0;
-} */
 
 /**
  *  Run the HTTP server in the background
@@ -411,6 +286,7 @@ void httpTask(void *data) {
 	static int result;
 
 	INT8U err;
+   INT8U aErr;
 
 	int localZone0;
 	int localZone1;
@@ -424,8 +300,6 @@ void httpTask(void *data) {
 
 	while (1) {
 		printDelayMsg();
-
-      // turn off
 
 
 		// interact with the web
@@ -442,7 +316,10 @@ void httpTask(void *data) {
 			// send email
 			if (localZone0 == ON)
          {
-         	pushed = 0;
+         	// take the fucking semaphore
+ 				OSSemPend(pushedSem, 0, &aErr);
+					pushed = 0;
+        		OSSemPost(pushedSem);
          }
 
 			// post the result to queue
@@ -463,8 +340,10 @@ void httpTask(void *data) {
 			// send email
 			if (localZone1 == ON)
          {
-         	pushed = 1;
-				//sendEmail(1);
+           // take the fucking semaphore
+ 				OSSemPend(pushedSem, 0, &aErr);
+					pushed = 1;
+        		OSSemPost(pushedSem);
          }
 
 			// post the result to queue
@@ -485,8 +364,9 @@ void httpTask(void *data) {
 			// send email
 			if (localZone2 == ON)
 			{
-         	pushed = 2;
-         	//sendEmail(2);
+ 				OSSemPend(pushedSem, 0, &aErr);
+					pushed = 2;
+        		OSSemPost(pushedSem);
          }
 
 			// post the result to queue
@@ -507,8 +387,10 @@ void httpTask(void *data) {
 			// send email
 			if (localZone3 == ON)
          {
-         	pushed = 3;
-				//sendEmail(3);
+              // take the fucking semaphore
+ 				OSSemPend(pushedSem, 0, &aErr);
+					pushed = 3;
+        		OSSemPost(pushedSem);
          }
 
 			// post the result to queue
@@ -522,79 +404,30 @@ void httpTask(void *data) {
 
 		}
 
-      if(alarming == OFF)
-      {
-			digOut(ID_BUZZER, OFF);
-         digOut(LED_0_ID, OFF);
-         digOut(LED_1_ID, OFF);
-         digOut(LED_2_ID, OFF);
-         digOut(LED_3_ID, OFF);
-      }
+      OSSemPend(pushedSem, 0, &aErr);
+
+	      if(alarming == OFF)
+   	   {
+				digOut(ID_BUZZER, OFF);
+	         digOut(LED_0_ID, OFF);
+   	      digOut(LED_1_ID, OFF);
+      	   digOut(LED_2_ID, OFF);
+         	digOut(LED_3_ID, OFF);
+	      }
+      OSSemPost(pushedSem);
 	}
 
 }
 
-void switchTask(void *data) {
-	/*
-	while (1) {
-		printf("\nswitchTask1() done\n");
-		if (kbhit()) {
-			if (getchar() == 'r') {
-				printf("resume");
-				OSTimeDlyResume(5);
-			}
-		}
-	}
-	*/
-	auto int *result;
-	auto INT8U err;
-	while (1) {
-		// wait forever for message
-		result = (int *)OSQPend(msgQueuePtr, 0, &err);
-		// receive message from queue
-		printf("\nMessage received is %d\n", *result);
-		// OSTaskChangePrio(TASK_BUZZER_PRIORITY, TASK_LOWEST_PRIORITY);
-		switch (*result) {
-			case ID_SWITCH_1:
-				OSSemPend(zone0Sem, 0, &err);
-				if (zone0State == ON) {
-					printf("\nzone 000 \n");
-				}
-				OSSemPost(zone0Sem);
-				break;
-
-			case ID_SWITCH_2:
-				OSSemPend(zone1Sem, 0, &err);
-				if (zone1State == ON) {
-					printf("\nzone 111 \n");
-				}
-				OSSemPost(zone1Sem);
-				break;
-
-			case ID_SWITCH_3:
-				OSSemPend(zone2Sem, 0, &err);
-				if (zone2State == ON) {
-					printf("\nzone 222 \n");
-				}
-				OSSemPost(zone2Sem);
-				break;
-
-			case ID_SWITCH_4:
-				OSSemPend(zone3Sem, 0, &err);
-				if (zone3State == ON) {
-					printf("\nzone 333 \n");
-				}
-				OSSemPost(zone3Sem);
-				break;
-
-			default:
-				break;
-		}
-	}
-}
 
 void buzzerTask(void* data) {
 	INT8U err;
+   INT8U aErr;
+
+   int localPushed;
+
+   localPushed = -1;
+
 	while (1) {
 		/*
 		 * Zone 1 check
@@ -648,18 +481,22 @@ void buzzerTask(void* data) {
 		}
         OSSemPost(zone3Sem);
 
-        //Send email
-        if(pushed > -1)
-        {
-	 		  sendEmail(pushed);
-        }
+          // take the fucking semaphore
+ 		OSSemPend(pushedSem, 0, &aErr);
+      	localPushed = pushed;
+      OSSemPost(pushedSem);
 
-        //Reset for next button push
-	     pushed = -1;
+      if(localPushed > -1)
+      {
+	 		  sendEmail(localPushed);
+      }
 
+      OSSemPend(pushedSem, 0, &aErr);
+      	pushed = -1;
+      OSSemPost(pushedSem);
 
 		// now leave the buzzer
-		OSTaskChangePrio(TASK_LOWEST_PRIORITY, TASK_BUZZER_PRIORITY);
+		OSTaskChangePrio(TASK_HIGHEST_PRIORITY, TASK_BUZZER_PRIORITY);
 		OSTimeDly(OS_TICKS_PER_SEC * 1);
 	}
 }
@@ -675,16 +512,14 @@ void startTask(void *data) {
 
 void createOtherTasks() {
 	OSTaskCreate(httpTask, NULL, 512, TASK_HTTP_PRIORITY);
-	OSTaskCreate(switchTask, NULL, 512, TASK_SWITCH_PRIORITY);
+	// OSTaskCreate(switchTask, NULL, 512, TASK_SWITCH_PRIORITY);
 	OSTaskCreate(buzzerTask, NULL, 512, TASK_BUZZER_PRIORITY);
 }
 
 void initHttp() {
 	char buffer[16];
-	brdInit();
 
-  	// configure IO channels DIO00 - DIO03 as digital outputs (sinking type outputs)
-
+   	brdInit();
 
 	// initialize socket
    	sock_init();
@@ -699,12 +534,6 @@ void initHttp() {
 
    	http_init();
    	tcp_reserveport(80);
-
-   	// set the initial state of the LED's
-   	/*strcpy(led_LED0, "ledon.gif");
-   	strcpy(led_LED1, "ledon.gif");
-   	strcpy(led_LED2, "ledon.gif");
-   	strcpy(led_LED3, "ledon.gif");*/
 }
 
 void initStmpMethod() {
@@ -737,8 +566,7 @@ void main (void) {
    alarming = OFF;
    pushed = -1;
 
-   brdInit();
-	initHttp();
+   initHttp();
    turnOffAllLeds();
 
 	// verification for email server
@@ -752,15 +580,13 @@ void main (void) {
 	// start multitasking
     OSInit();
 		buzzerSemaphore = OSSemCreate(1);
-		zone0Sem = OSSemCreate(1);
-		zone1Sem = OSSemCreate(1);
-		zone2Sem = OSSemCreate(1);
-		zone3Sem = OSSemCreate(1);
+		zone0Sem  = OSSemCreate(1);
+		zone1Sem  = OSSemCreate(1);
+		zone2Sem  = OSSemCreate(1);
+		zone3Sem  = OSSemCreate(1);
+      pushedSem = OSSemCreate(1);
 		OSTaskCreate(startTask, NULL, 512, TASK_START_PRIORITY);
     OSStart();
 }
-
-
-
 
 

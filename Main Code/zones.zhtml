@@ -1,1 +1,1 @@
-<?z print($zone0State) ?>, <?z print($zone0Alarm) ?>, <?z print($zone1State) ?>, <?z print($zone1Alarm) ?>, <?z print($zone2State) ?>,<?z print($zone2Alarm) ?>,<?z print($zone3State) ?>,<?z print($zone3Alarm) ?>
+<?z print($zone0State) ?>,<?z print($zone0Alarm) ?>,<?z print($zone1State) ?>,<?z print($zone1Alarm) ?>,<?z print($zone2State) ?>,<?z print($zone2Alarm) ?>,<?z print($zone3State) ?>,<?z print($zone3Alarm) ?>,

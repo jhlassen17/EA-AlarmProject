@@ -128,43 +128,43 @@ handleUpdate = function(data){
 	var zones = data.split(","); //now zones is an array of the values
 
 	//zone0pic, zone1pic, zone2pic, zone3pic are the 4 divs for the zones
-	if (zone0State === 1){
-		$('#zone0pic').css('backgroundcolor', 'blue');
+	if (zones[0] === '1'){
+		$('#zone0pic').css('background-color', 'blue');
 	}
-	else if (zone0Alarm === 0){
-		$('#zone0pic').css('backgroundcolor', 'red');
-	}
-	else 
-		$('#zone0pic').css('backgroundcolor', 'green');
-
-if (zone1State === 1){
-		$('#zone1pic').css('backgroundcolor', 'blue');
-	}
-	else if (zone1Alarm === 0){
-		$('#zone1pic').css('backgroundcolor', 'red');
+	else if (zones[1] === '0'){
+		$('#zone0pic').css('background-color', 'red');
 	}
 	else 
-		$('#zone1pic').css('backgroundcolor', 'green');
+		$('#zone0pic').css('background-color', 'green');
 
-
-	if (zone2State === 1){
-		$('#zone2pic').css('backgroundcolor', 'blue');
+if (zones[2] === '1'){
+		$('#zone1pic').css('background-color', 'blue');
 	}
-	else if (zone2Alarm === 0){
-		$('#zone2pic').css('backgroundcolor', 'red');
-	}
-	else 
-		$('#zone2pic').css('backgroundcolor', 'green');
-
-
-	if (zone3State === 1){
-		$('#zone0pic').css('backgroundcolor', 'blue');
-	}
-	else if (zone3Alarm === 0){
-		$('#zone3pic').css('backgroundcolor', 'red');
+	else if (zones[3] === '0'){
+		$('#zone1pic').css('background-color', 'red');
 	}
 	else 
-		$('#zone3pic').css('backgroundcolor', 'green');
+		$('#zone1pic').css('background-color', 'green');
+
+
+	if (zones[4] === '1'){
+		$('#zone2pic').css('background-color', 'blue');
+	}
+	else if (zones[5] === '0'){
+		$('#zone2pic').css('background-color', 'red');
+	}
+	else 
+		$('#zone2pic').css('background-color', 'green');
+
+
+	if (zones[6] === '1'){
+		$('#zone3pic').css('background-color', 'blue');
+	}
+	else if (zones[7] === '0'){
+		$('#zone3pic').css('background-color', 'red');
+	}
+	else 
+		$('#zone3pic').css('background-color', 'green');
 
 
 	setTimeout(update, 500);
