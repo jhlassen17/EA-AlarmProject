@@ -56,6 +56,27 @@
 //#define SMTP_DEBUG
 #define SMTP_AUTH_FAIL_IF_NO_AUTH
 
+/*
+ * By default, digest authentication is turned off.  Note that you
+ * can set USE_HTTP_BASIC_AUTHENTICATION to 0 to remove the code for
+ * basic authentication at compile time.
+ */
+#define USE_HTTP_DIGEST_AUTHENTICATION	1
+
+/*
+ * If you want to associate multiple users with a particular
+ * resource (web page), then you need to set the following macro.
+ * This macro defines how many users can be associated with a web
+ * page, and defaults to 1.
+ */
+#define SSPEC_USERSPERRESOURCE 	6
+
+// The following line defines an "admin" group, which will be used to protect
+// certain variables.  This must be defined before we register the variables
+// below.
+#web_groups admin
+
+
 
 // ucos library must be explicity used
 #memmap xmem
@@ -181,8 +202,6 @@ int pushed;
 SSPEC_MIMETABLE_START
 	SSPEC_MIME_FUNC(".zhtml", "text/html", zhtml_handler),
 	SSPEC_MIME(".zhtml", "text/html"),
-	SSPEC_MIME(".gif", "image/gif"),
-	SSPEC_MIME(".cgi", "")
 SSPEC_MIMETABLE_END
 
 
@@ -524,6 +543,7 @@ void createOtherTasks() {
 
 void initHttp() {
 	char buffer[16];
+   int userid;
 
    	brdInit();
 
@@ -540,6 +560,40 @@ void initHttp() {
 
    	http_init();
    	tcp_reserveport(80);
+
+      // If the browser specifies a directory (instead of a proper resource name)
+   // default to using "index.zhtml" in that directory, if it exists.
+   // If we don't use this function, the default is "index.html" which won't
+   // work for this sample.
+   http_set_path("/", "/index.zhtml");
+
+      // The following line limits access to the "/admin" directory to the admin
+	// group.  It also requires basic authentication for the "/admin"
+	// directory.
+   sspec_addrule("/", "Admin", admin, admin, SERVER_ANY,
+                 SERVER_AUTH_BASIC, NULL);
+
+	// The following two lines create an "admin" user and adds it to the admin
+	// group.
+   userid = sauth_adduser("rabbit", "fish", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+
+   // Add our own users
+   // Ario
+   userid = sauth_adduser("ario", "fish", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Chan
+   userid = sauth_adduser("chan", "bar", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Jeff
+   userid = sauth_adduser("jeff", "bar7", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Shea
+   userid = sauth_adduser("shea", "bar2", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
+   // Toby
+   userid = sauth_adduser("toby", "bar3", SERVER_ANY);
+   sauth_setusermask(userid, admin, NULL);
 }
 
 void initStmpMethod() {
