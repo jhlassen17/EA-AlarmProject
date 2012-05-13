@@ -79,6 +79,7 @@
 #define BODY3     	"You better watch it, zone 4.\r\n" \
 				 			"You are being robbed son."
 
+// Text Carriers
 #define CARRIER0	   "@txt.att.net"
 #define CARRIER1	   "@messaging.sprintpcs.com"
 #define CARRIER2	   "@vtext.com"
@@ -130,7 +131,6 @@ void      *msgQueueData[MSG_QUEUE_SIZE];
 
  void main(void);					// Main Method
 
- //
 
  /*
   * Global Variables
@@ -192,7 +192,7 @@ SSPEC_RESOURCETABLE_START
 SSPEC_RESOURCETABLE_END
 
 
-
+// Initialization Functions
 
 /**
  * Initializes Carrier Domain Array
@@ -297,39 +297,41 @@ void setupDigOut() {
 
 // Tasks
 
+/**
+ * This task polls the switches and then 
+ * posts a message to the message queue 
+ * if an alarm needs to be activated
+ */
 void switchTask(void *data) {
-	//
+	// Error Referene
 	INT8U err;
 
-	//
+	// Local zone status
 	auto int localZone0;
 	auto int localZone1;
 	auto int localZone2;
 	auto int localZone3;
-	//
+	// Local switch state
 	auto int sw0State;
 	auto int sw1State;
 	auto int sw2State;
 	auto int sw3State;
-	//
+	// Result for message queue
 	static char result;
 
-	//
+	// Initialize zones
 	localZone0 = ON;
 	localZone1 = ON;
 	localZone2 = ON;
 	localZone3 = ON;
-	//
+	// Initialize switch state
 	sw0State = OFF;
 	sw1State = OFF;
 	sw2State = OFF;
 	sw3State = OFF;
 
-	//
+	// Loop forever
 	while(1) {
-		// Debug
-		//printf("Switch Task Run\n");
-
 		// Check switches
 		sw0State = digIn(ID_SWITCH_1);
 		sw1State = digIn(ID_SWITCH_2);
@@ -339,6 +341,7 @@ void switchTask(void *data) {
 		// Check to see if we have any switches
 		if(!sw0State || !sw1State || !sw2State || !sw3State ) {
 
+			// Take a semaphore and get the current zone states
 			OSSemPend(zoneSem, 0, &err);
 				localZone0 = zone0State;
 				localZone1 = zone1State;
@@ -346,20 +349,21 @@ void switchTask(void *data) {
 				localZone3 = zone3State;
 			OSSemPost(zoneSem);
 
+			// Check to see which zones (if any) have been triggered
 			if(!sw0State && localZone0 == ON) {
-				// Msg Queue Zone 0?
+				// Msg Queue Zone 0
 				result = '0';
 			}
 			else if(!sw1State && localZone1 == ON) {
-				// Msg Queue Zone 1?
+				// Msg Queue Zone 1
 				result = '1';
 			}
 			else if(!sw2State && localZone2 == ON) {
-				// Msg Queue Zone 2?
+				// Msg Queue Zone 2
 				result = '2';
 			}
 			else if(!sw3State && localZone3 == ON) {
-				// Msg Queue Zone 3?
+				// Msg Queue Zone 3
 				result = '3';
 			}
 			else {
@@ -373,7 +377,7 @@ void switchTask(void *data) {
 
 		}
 
-		// Update Alarm State ?
+		// Update Alarm State (in case web bypassed/disarmed)
 		OSSemPend(alarmSem, 0, &err);
 
 			if(alarming == OFF) {
@@ -387,96 +391,106 @@ void switchTask(void *data) {
 
 		//Done
 		OSSemPost(switchToHTTP);
-		// Try to take a semaphore
+		// Try to take a semaphore, this will block us
  		OSSemPend(httpToSwitch, 0, &err);
 	}
 }
 
+/**
+ * Task that handles HTTP requests
+ */
 void httpTask(void *data) {
-	//
+	// Error reference
 	INT8U err;
 
-	//
+	// Loop forever
 	while(1) {
-		//HTTP
-		// Debug
-		// printf("HTTP Task Run\n");
-
-		// Try to take a semaphore
+		
+		// Try to take a semaphore (this will block us the second time)
  		OSSemPend(switchToHTTP, 0, &err);
 
 		// Interact with the web
 		http_handler();
 
 
-		//Done
+		// Post a semaphore so that the switch task can be unblocked
 		OSSemPost(httpToSwitch);
 	}
 }
 
+/**
+ * Alarm task that handles sounding the alarm and sending 
+ * out the alerts
+ */
 void alarmTask(void *data) {
-	//
+	// Error reference
 	INT8U err;
-	//
+	
+	// Result variables
 	char *result;
 	auto char realResult;
 
+	// Loop forever
 	while(1) {
-		//Read MSG Queue, set off alarm, etc
-		// wait forever for message
+		//Read MSG Queue, wait forever for message
 		result = (char *)OSQPend(msgQueuePtr, 0, &err);
 		realResult = *result;
 
 		// Debug
 		printf("Alarm Task Run\n");
 
+		// Check for zone 1
 		if(realResult == '0') {
 			printf("\nZone 1 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_0_ID, ON);
 
+			// Update the current alarm state
 			OSSemPend(alarmSem, 0, &err);
 				zone0Alarm = ON;
 				alarming = ON;
 			OSSemPost(alarmSem);
 
-			//
+			// Send the alert
 			sendEmail(0);
 		} else if(realResult == '1') {
 			printf("\nZone 12Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_1_ID, ON);
 
+			// Update the current alarm state
 			OSSemPend(alarmSem, 0, &err);
 				zone1Alarm = ON;
 				alarming = ON;
 			OSSemPost(alarmSem);
 
-			//
+			// Send the alert
 			sendEmail(1);
 		} else if(realResult == '2') {
 			printf("\nZone 3 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_2_ID, ON);
 
+			// Update the current alarm state
 			OSSemPend(alarmSem, 0, &err);
 				zone2Alarm = ON;
 				alarming = ON;
 			OSSemPost(alarmSem);
 
-			//
+			// Send the alert
 			sendEmail(2);
 		} else if(realResult == '3') {
 			printf("\nZone 4 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_3_ID, ON);
 
+			// Update the current alarm state
 			OSSemPend(alarmSem, 0, &err);
 				zone3Alarm = ON;
 				alarming = ON;
 			OSSemPost(alarmSem);
 
-			//
+			// Send the alert
 			sendEmail(3);
 		}
 	}
@@ -484,12 +498,14 @@ void alarmTask(void *data) {
 
 
 
-
+/**
+ * Sends an email alert
+ */
 int sendEmail(int email) {
 	// Full email address
    char fullEmail[50];
 
-
+   // Check for error, should not happen any more
    if (email < 0) {
    	printf("Now you done fucked up son.");
    	return -1;
@@ -502,8 +518,6 @@ int sendEmail(int email) {
 	smtp_sendmail(
 		strcat(fullEmail, carrierDomains[carrierChoice]), FROM,
 		SUBJECT, emailBody[email]);
-
-
 
 	// Wait until the message has been sent
 	while (smtp_mailtick() == SMTP_PENDING) {
@@ -518,6 +532,7 @@ int sendEmail(int email) {
 		printf("\n\rError sending the email message\n\r");
 	}
 
+	// Return
 	return 0;
 }
 
@@ -555,7 +570,7 @@ void main (void) {
 	// Setup Message Queue
 	msgQueuePtr = OSQCreate(&msgQueueData[0], MSG_QUEUE_SIZE);
 
-	//Setup tasks
+	// Setup tasks
 	OSTaskCreate(httpTask, NULL, 512, TASK_HTTP_PRIORITY);
 	OSTaskCreate(switchTask, NULL, 512, TASK_SWITCH_PRIORITY);
 	OSTaskCreate(alarmTask, NULL, 512, TASK_ALARM_PRIORITY);
