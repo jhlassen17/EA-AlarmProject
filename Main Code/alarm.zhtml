@@ -111,6 +111,10 @@
 			<input type="hidden" name="zone1Alarm" value="1" />
 			<input type="hidden" name="zone2Alarm" value="1" />
 			<input type="hidden" name="zone3Alarm" value="1" />
+			<input type="hidden" name="zone0State" value="1" />
+			<input type="hidden" name="zone1State" value="1" />
+			<input type="hidden" name="zone2State" value="1" />
+			<input type="hidden" name="zone3State" value="1" />
 			<input type="hidden" name="alarming" value="1" />
 			<input type="submit" name="bypass" value="Bypass All" for="bypassAll"/>
 		</form>
