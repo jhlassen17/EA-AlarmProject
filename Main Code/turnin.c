@@ -29,19 +29,10 @@
 
 // TCP / HTTP Config
 #define TCPCONFIG 					3
-#define TCP_BUF_SIZE 				1024
-// #define STACK_CNT_512				2
-// #define STACK_CNT_2K					2
+#define TCP_BUF_SIZE 				4096
 #define HTTP_MAXSERVERS 			1
-#define MAX_TCP_SOCKET_BUFFERS 		12
-#define HTTP_MAXBUFFER				512
+#define MAX_TCP_SOCKET_BUFFERS 		10
 #define USE_RABBITWEB 1
-#define USE_HTTP_DIGEST_AUTHENTICATION	1
-#define DHCP_MINRETRY 1
-// The following line defines an "admin" group, which will be used to protect
-// certain variables.  This must be defined before we register the variables
-// below.
-#web_groups admin
 
 // RTOS Settings
 #define OS_TASK_CHANGE_PRIO_EN   1
@@ -78,7 +69,7 @@
  * All events
  */
 OS_EVENT  *msgQueuePtr;
-OS_EVENT  *buzzerSemaphore;
+// OS_EVENT  *buzzerSemaphore;
 OS_EVENT  *zone0Sem;
 OS_EVENT  *zone1Sem;
 OS_EVENT  *zone2Sem;
@@ -87,24 +78,34 @@ OS_EVENT  *pushedSem;
 
 /*
  * The structure that holds an email message
- */
+ *//*
 typedef struct {
 	char *from;
 	char *to;
 	char *subject;
 	char *body;
-} Email;
+} Email;*/
 
 /*
  * Holds the email messages
  */
-Email emailArray[4];
+// Email emailArray[4];
 
 #define FROM     	"alarm@yalost.me"
 #define TO       	"9176489840@vtext.com"
-#define SUBJECT  	"You've got mail!"
-#define BODY     	"Visit the Rabbit Semiconductor web site.\r\n" \
-				 		"There you'll find the latest news about Dynamic C."
+#define SUBJECT  	"You've got alarms!"
+
+#define BODY0     	"You better watch it, zone 1.\r\n" \
+				 			"You are being robbed son."
+
+#define BODY1     	"You better watch it, zone 2.\r\n" \
+				 			"You are being robbed son."
+
+#define BODY2     	"You better watch it, zone 3.\r\n" \
+				 			"You are being robbed son."
+
+#define BODY3     	"You better watch it, zone 4.\r\n" \
+				 			"You are being robbed son."
 
 /*
  * Message queue data
@@ -114,7 +115,7 @@ void      *msgQueueData[25];
 /*
  * Function Prototypes
  */
-int 	isPrime				(int n);
+// int 	isPrime				(int n);
 void 	httpTask				(void *data);
 void 	switchTask			(void *data);
 void 	startTask   		(void *data);
@@ -123,7 +124,7 @@ void 	createOtherTasks	();
 void  checkSwitch       ();
 
 void 	initHttp				();
-void 	initEmails			();
+//void 	initEmails			();
 void 	initStmpMethod		();
 void 	initCarrierDomains();
 
@@ -167,13 +168,10 @@ int carrierChoice;
 char phoneNumber[16];
 #web phoneNumber;
 
+char emailBody[4][256];
+
 //
 int pushed;
-int user1;
-int user2;
-int user3;
-int user4;
-int user5;
 
 // Web Pages
 #ximport "/alarm.zhtml" index_zhtml
@@ -190,27 +188,28 @@ SSPEC_MIMETABLE_END
 
 SSPEC_RESOURCETABLE_START
 	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
-	SSPEC_RESOURCE_XMEMFILE("/admin/alarm.zhtml", index_zhtml),
-  	SSPEC_RESOURCE_XMEMFILE("/admin/zones.zhtml", zones_zhtml)
+	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
+  	SSPEC_RESOURCE_XMEMFILE("/zones.zhtml", zones_zhtml)
 SSPEC_RESOURCETABLE_END
 
 nodebug void clearScreen() {
-   //printf("\x1Bt");            	// Space Opens Window
+   printf("\x1Bt");            	// Space Opens Window
 }
 
 nodebug void dispStr(int x, int y, char *s) {
-   //x += 0x20;
-   //y += 0x20;
-   //printf ("\x1B=%c%c%s", x, y, s);
+   x += 0x20;
+   y += 0x20;
+   printf ("\x1B=%c%c%s", x, y, s);
 }
 
 void printDelayMsg() {
-	//dispStr(5, 5, "|");
-   //dispStr(5, 5, "/");
-   //dispStr(5, 5, "-");
-   //dispStr(5, 5, "\\");
+	dispStr(5, 5, "|");
+   dispStr(5, 5, "/");
+   dispStr(5, 5, "-");
+   dispStr(5, 5, "\\");
 }
 
+/*
 void initEmails() {
 	emailArray[0].from = "alarm@yalost.me";
 	emailArray[0].to = TO;
@@ -231,7 +230,7 @@ void initEmails() {
 	emailArray[3].to = TO;
 	emailArray[3].subject = "Alarm Alert!";
 	emailArray[3].body = "Time to sleep";
-}
+}                                           */
 
 // "###@messaging.sprintpcs.com"
 // "###@txt.att.net"
@@ -242,7 +241,6 @@ void initCarrierDomains() {
    strcpy(carrierDomains[1],"@messaging.sprintpcs.com");
    strcpy(carrierDomains[2],"@vtext.com");
    strcpy(carrierDomains[3],"@tmomail.net");
-
    strcpy(phoneNumber,"9176489840");
    carrierChoice=2;
 }
@@ -250,32 +248,30 @@ void initCarrierDomains() {
 int sendEmail(int email) {
 	// Full email address
    char fullEmail[50];
-   strcpy(fullEmail,"");
 
 
-   if(email < 0 )
-   {
+   if (email < 0) {
    	printf("Now you done fucked up son.");
-   	 return -1;
+   	return -1;
    }
 
    //Copy the phone numner
-   strcpy(fullEmail,phoneNumber);
+   strcpy(fullEmail, phoneNumber);
 
    // Send the email
 	smtp_sendmail(
 		//emailArray[email].to,
-      strcat(fullEmail,carrierDomains[carrierChoice]), //check that ph# + choice have values?
-      emailArray[email].from,
-   	    emailArray[email].subject,
-		emailArray[email].body);
+      strcat(fullEmail, carrierDomains[carrierChoice]), //check that ph# + choice have values?
+      FROM,
+   	SUBJECT,
+		emailBody[email]);
 
 
 	// Wait until the message has been sent
 	while (smtp_mailtick() == SMTP_PENDING) {
-    	//clearScreen();
-		//printf("pending ! ! ! ! !\n");
-		//continue;
+    	clearScreen();
+		printf("pending ! ! ! ! !\n");
+		continue;
 	}
 
 	// Check to see if the message was sent successfully
@@ -286,9 +282,6 @@ int sendEmail(int email) {
 		printf("\n\rError sending the email message\n\r");
 	}
 
-   printf("Phonenumber: %s\n", phoneNumber);
-   printf("Carrier: %s\n", carrierDomains[carrierChoice]);
-
 	return 0;
 }
 
@@ -298,7 +291,7 @@ int sendEmail(int email) {
  *	@param: pointer to void
  */
 void httpTask(void *data) {
-	static int result;
+	/*static*/ int result;
 
 	INT8U err;
    INT8U aErr;
@@ -320,6 +313,7 @@ void httpTask(void *data) {
 		// interact with the web
 		http_handler();
 
+      // Check switch 1
 		if (!digIn(ID_SWITCH_1)) {
 			result = 16;
 
@@ -338,7 +332,7 @@ void httpTask(void *data) {
          }
 
 			// post the result to queue
-			OSQPost(msgQueuePtr, (void *)&result);
+			// OSQPost(msgQueuePtr, (void *)&result);
 
 			// delay for 2 seconds
 			OSTimeDly(OS_TICKS_PER_SEC * 1);
@@ -362,7 +356,7 @@ void httpTask(void *data) {
          }
 
 			// post the result to queue
-			OSQPost(msgQueuePtr, (void *)&result);
+			// OSQPost(msgQueuePtr, (void *)&result);
 
 			// delay for 2 seconds
 			OSTimeDly(OS_TICKS_PER_SEC * 1);
@@ -385,7 +379,7 @@ void httpTask(void *data) {
          }
 
 			// post the result to queue
-			OSQPost(msgQueuePtr, (void *)&result);
+			// OSQPost(msgQueuePtr, (void *)&result);
 
 			// delay for 2 seconds
 			OSTimeDly(OS_TICKS_PER_SEC * 1);
@@ -409,7 +403,7 @@ void httpTask(void *data) {
          }
 
 			// post the result to queue
-			OSQPost(msgQueuePtr, (void *)&result);
+			// OSQPost(msgQueuePtr, (void *)&result);
 
 			// delay for 1 second
 			OSTimeDly(OS_TICKS_PER_SEC * 1);
@@ -444,82 +438,78 @@ void buzzerTask(void* data) {
    localPushed = -1;
 
 	while (1) {
-		/*
+      OSSemPend(pushedSem, 0, &aErr);
+      	localPushed = pushed;
+         pushed = -1;
+      OSSemPost(pushedSem);
+
+
+      /*
 		 * Zone 1 check
 		 */
  		OSSemPend(zone0Sem, 0, &err);
-		if (zone0State == ON && pushed == 0) {
+		if (zone0State == ON && localPushed == 0) {
 			printf("\nzone 00000000000000000\n");
          digOut(ID_BUZZER, ON);
          digOut(LED_0_ID, ON);
          zone0Alarm = ON;
          alarming = ON;
 		}
-     OSSemPost(zone0Sem);
+        OSSemPost(zone0Sem);
 
 		/*
 		 * Zone 2 check
 		 */
  		OSSemPend(zone1Sem, 0, &err);
-		if (zone1State == ON && pushed == 1) {
+		if (zone1State == ON && localPushed == 1) {
 			printf("\nzone 1111111111111111\n");
          digOut(ID_BUZZER, ON);
          digOut(LED_1_ID, ON);
          zone1Alarm = ON;
          alarming = ON;
 		}
-     	OSSemPost(zone1Sem);
+        OSSemPost(zone1Sem);
 
 		/*
 		 * Zone 3 check
 		 */
  		OSSemPend(zone2Sem, 0, &err);
-		if (zone2State == ON && pushed == 2) {
+		if (zone2State == ON && localPushed == 2) {
 			printf("\nzone 22222222222222222\n");
          digOut(ID_BUZZER, ON);
          digOut(LED_2_ID, ON);
          zone2Alarm = ON;
          alarming = ON;
 		}
-      OSSemPost(zone2Sem);
+        OSSemPost(zone2Sem);
 
 		/*
 		 * Zone 4 check
 		 */
  		OSSemPend(zone3Sem, 0, &err);
-		if (zone3State == ON && pushed == 3) {
+		if (zone3State == ON && localPushed == 3) {
 			printf("\nzone 33333333333333333\n");
          digOut(ID_BUZZER, ON);
          digOut(LED_3_ID, ON);
          zone3Alarm = ON;
          alarming = ON;
 		}
-      OSSemPost(zone3Sem);
+        OSSemPost(zone3Sem);
 
-          // take the fucking semaphore
- 		OSSemPend(pushedSem, 0, &aErr);
-      	localPushed = pushed;
-      OSSemPost(pushedSem);
 
-      if(localPushed > -1)
-      {
+      if (localPushed > -1) {
 	 		  sendEmail(localPushed);
-
-
-	      OSSemPend(pushedSem, 0, &aErr);
-      		pushed = -1;
-      	OSSemPost(pushedSem);
       }
 
 		// now leave the buzzer
-		OSTaskChangePrio(TASK_HIGHEST_PRIORITY, TASK_BUZZER_PRIORITY);
+		//OSTaskChangePrio(TASK_HIGHEST_PRIORITY, TASK_BUZZER_PRIORITY);
 		OSTimeDly(OS_TICKS_PER_SEC * 1);
 	}
 }
 
 void startTask(void *data) {
 	// create a message queue
-  	msgQueuePtr = OSQCreate(&msgQueueData[0], MSG_QUEUE_SIZE);
+  	//msgQueuePtr = OSQCreate(&msgQueueData[0], MSG_QUEUE_SIZE);
 	// create other tasks
 	createOtherTasks();
 	// wait for 5 seconds
@@ -545,46 +535,18 @@ void initHttp() {
 		tcp_tick(NULL);
 	}
 
-	//printf("My IP address is %s\n", inet_ntoa(buffer, gethostid()));
-   printf("Got IP\n");
+	printf("My IP address is %s\n", inet_ntoa(buffer, gethostid()));
 
-   http_set_path("/", "/admin/index.zhtml");
-   // The following line limits access to the "/admin" directory to the admin
-	// group.  It also requires basic authentication for the "/admin"
-	// directory.
-   sspec_addrule("/admin", "Admin", admin, admin, SERVER_ANY,
-                 SERVER_AUTH_BASIC, NULL);
 
-      // The following two lines create an "admin" user and adds it to the admin
-	// group.
-   //user1 = sauth_adduser("rabbit", "fish", SERVER_ANY);
-   //sauth_setusermask(user1, admin, NULL);
-
-   // Add our own users
-   // Ario
-   user1 = sauth_adduser("ario", "fish", SERVER_ANY);
-   sauth_setusermask(user1, admin, NULL);
-   // Chan
-   user2 = sauth_adduser("chan", "bar", SERVER_ANY);
-   sauth_setusermask(user2, admin, NULL);
-   // Jeff
-   user3 = sauth_adduser("jeff", "bar7", SERVER_ANY);
-   sauth_setusermask(user3, admin, NULL);
-   // Shea
-   user4 = sauth_adduser("shea", "bar2", SERVER_ANY);
-   sauth_setusermask(user4, admin, NULL);
-   // Toby
-   user5 = sauth_adduser("toby", "bar3", SERVER_ANY);
-   sauth_setusermask(user5, admin, NULL);
-
-  	http_init();
-  	tcp_reserveport(80);
-
+   	http_init();
+   	tcp_reserveport(80);
 }
 
 void initStmpMethod() {
-	initEmails();
-
+	strcpy(emailBody[0], BODY0);
+   strcpy(emailBody[1], BODY1);
+   strcpy(emailBody[2], BODY2);
+   strcpy(emailBody[3], BODY3);
 }
 
 void turnOffAllLeds() {
@@ -596,9 +558,6 @@ void turnOffAllLeds() {
 }
 
 void main (void) {
-
-	initHttp();
-   turnOffAllLeds();
 	/*
    	All zones are armed initially
       	0 = armed
@@ -615,13 +574,8 @@ void main (void) {
    alarming = OFF;
    pushed = -1;
 
-
-
-	//user1 = sauth_adduser("ario", "bar", SERVER_HTTP);
-	//user2 = sauth_adduser("chan", "bar2", SERVER_HTTP);
-	//user3 = sauth_adduser("jeff", "bar3", SERVER_HTTP);
-  	//user4 = sauth_adduser("shea", "bar3", SERVER_HTTP);
-  	//user5 = sauth_adduser("toby", "bar3", SERVER_HTTP);
+   initHttp();
+   turnOffAllLeds();
 
 	// verification for email server
 	#ifdef USE_SMTP_AUTH
@@ -633,7 +587,7 @@ void main (void) {
 
 	// start multitasking
     OSInit();
-		buzzerSemaphore = OSSemCreate(1);
+		//buzzerSemaphore = OSSemCreate(1);
 		zone0Sem  = OSSemCreate(1);
 		zone1Sem  = OSSemCreate(1);
 		zone2Sem  = OSSemCreate(1);
@@ -641,6 +595,8 @@ void main (void) {
       pushedSem = OSSemCreate(1);
 		OSTaskCreate(startTask, NULL, 512, TASK_START_PRIORITY);
     OSStart();
+    printf("Toby is great!");
 }
+
 
 
