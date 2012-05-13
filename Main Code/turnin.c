@@ -29,10 +29,19 @@
 
 // TCP / HTTP Config
 #define TCPCONFIG 					3
-#define TCP_BUF_SIZE 				4096
+#define TCP_BUF_SIZE 				1024
+// #define STACK_CNT_512				2
+// #define STACK_CNT_2K					2
 #define HTTP_MAXSERVERS 			1
-#define MAX_TCP_SOCKET_BUFFERS 		10
+#define MAX_TCP_SOCKET_BUFFERS 		12
+#define HTTP_MAXBUFFER				512
 #define USE_RABBITWEB 1
+#define USE_HTTP_DIGEST_AUTHENTICATION	1
+#define DHCP_MINRETRY 1
+// The following line defines an "admin" group, which will be used to protect
+// certain variables.  This must be defined before we register the variables
+// below.
+#web_groups admin
 
 // RTOS Settings
 #define OS_TASK_CHANGE_PRIO_EN   1
@@ -160,6 +169,11 @@ char phoneNumber[16];
 
 //
 int pushed;
+int user1;
+int user2;
+int user3;
+int user4;
+int user5;
 
 // Web Pages
 #ximport "/alarm.zhtml" index_zhtml
@@ -176,25 +190,25 @@ SSPEC_MIMETABLE_END
 
 SSPEC_RESOURCETABLE_START
 	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
-	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
-  	SSPEC_RESOURCE_XMEMFILE("/zones.zhtml", zones_zhtml)
+	SSPEC_RESOURCE_XMEMFILE("/admin/alarm.zhtml", index_zhtml),
+  	SSPEC_RESOURCE_XMEMFILE("/admin/zones.zhtml", zones_zhtml)
 SSPEC_RESOURCETABLE_END
 
 nodebug void clearScreen() {
-   printf("\x1Bt");            	// Space Opens Window
+   //printf("\x1Bt");            	// Space Opens Window
 }
 
 nodebug void dispStr(int x, int y, char *s) {
-   x += 0x20;
-   y += 0x20;
-   printf ("\x1B=%c%c%s", x, y, s);
+   //x += 0x20;
+   //y += 0x20;
+   //printf ("\x1B=%c%c%s", x, y, s);
 }
 
 void printDelayMsg() {
-	dispStr(5, 5, "|");
-   dispStr(5, 5, "/");
-   dispStr(5, 5, "-");
-   dispStr(5, 5, "\\");
+	//dispStr(5, 5, "|");
+   //dispStr(5, 5, "/");
+   //dispStr(5, 5, "-");
+   //dispStr(5, 5, "\\");
 }
 
 void initEmails() {
@@ -236,6 +250,7 @@ void initCarrierDomains() {
 int sendEmail(int email) {
 	// Full email address
    char fullEmail[50];
+   strcpy(fullEmail,"");
 
 
    if(email < 0 )
@@ -258,9 +273,9 @@ int sendEmail(int email) {
 
 	// Wait until the message has been sent
 	while (smtp_mailtick() == SMTP_PENDING) {
-    	clearScreen();
-		printf("pending ! ! ! ! !\n");
-		continue;
+    	//clearScreen();
+		//printf("pending ! ! ! ! !\n");
+		//continue;
 	}
 
 	// Check to see if the message was sent successfully
@@ -440,7 +455,7 @@ void buzzerTask(void* data) {
          zone0Alarm = ON;
          alarming = ON;
 		}
-        OSSemPost(zone0Sem);
+     OSSemPost(zone0Sem);
 
 		/*
 		 * Zone 2 check
@@ -453,7 +468,7 @@ void buzzerTask(void* data) {
          zone1Alarm = ON;
          alarming = ON;
 		}
-        OSSemPost(zone1Sem);
+     	OSSemPost(zone1Sem);
 
 		/*
 		 * Zone 3 check
@@ -466,7 +481,7 @@ void buzzerTask(void* data) {
          zone2Alarm = ON;
          alarming = ON;
 		}
-        OSSemPost(zone2Sem);
+      OSSemPost(zone2Sem);
 
 		/*
 		 * Zone 4 check
@@ -479,7 +494,7 @@ void buzzerTask(void* data) {
          zone3Alarm = ON;
          alarming = ON;
 		}
-        OSSemPost(zone3Sem);
+      OSSemPost(zone3Sem);
 
           // take the fucking semaphore
  		OSSemPend(pushedSem, 0, &aErr);
@@ -489,11 +504,12 @@ void buzzerTask(void* data) {
       if(localPushed > -1)
       {
 	 		  sendEmail(localPushed);
-      }
 
-      OSSemPend(pushedSem, 0, &aErr);
-      	pushed = -1;
-      OSSemPost(pushedSem);
+
+	      OSSemPend(pushedSem, 0, &aErr);
+      		pushed = -1;
+      	OSSemPost(pushedSem);
+      }
 
 		// now leave the buzzer
 		OSTaskChangePrio(TASK_HIGHEST_PRIORITY, TASK_BUZZER_PRIORITY);
@@ -529,11 +545,41 @@ void initHttp() {
 		tcp_tick(NULL);
 	}
 
-	printf("My IP address is %s\n", inet_ntoa(buffer, gethostid()));
+	//printf("My IP address is %s\n", inet_ntoa(buffer, gethostid()));
+   printf("Got IP\n");
 
+   http_set_path("/", "/admin/index.zhtml");
+   // The following line limits access to the "/admin" directory to the admin
+	// group.  It also requires basic authentication for the "/admin"
+	// directory.
+   sspec_addrule("/admin", "Admin", admin, admin, SERVER_ANY,
+                 SERVER_AUTH_BASIC, NULL);
 
-   	http_init();
-   	tcp_reserveport(80);
+      // The following two lines create an "admin" user and adds it to the admin
+	// group.
+   //user1 = sauth_adduser("rabbit", "fish", SERVER_ANY);
+   //sauth_setusermask(user1, admin, NULL);
+
+   // Add our own users
+   // Ario
+   user1 = sauth_adduser("ario", "fish", SERVER_ANY);
+   sauth_setusermask(user1, admin, NULL);
+   // Chan
+   user2 = sauth_adduser("chan", "bar", SERVER_ANY);
+   sauth_setusermask(user2, admin, NULL);
+   // Jeff
+   user3 = sauth_adduser("jeff", "bar7", SERVER_ANY);
+   sauth_setusermask(user3, admin, NULL);
+   // Shea
+   user4 = sauth_adduser("shea", "bar2", SERVER_ANY);
+   sauth_setusermask(user4, admin, NULL);
+   // Toby
+   user5 = sauth_adduser("toby", "bar3", SERVER_ANY);
+   sauth_setusermask(user5, admin, NULL);
+
+  	http_init();
+  	tcp_reserveport(80);
+
 }
 
 void initStmpMethod() {
@@ -550,6 +596,9 @@ void turnOffAllLeds() {
 }
 
 void main (void) {
+
+	initHttp();
+   turnOffAllLeds();
 	/*
    	All zones are armed initially
       	0 = armed
@@ -566,8 +615,13 @@ void main (void) {
    alarming = OFF;
    pushed = -1;
 
-   initHttp();
-   turnOffAllLeds();
+
+
+	//user1 = sauth_adduser("ario", "bar", SERVER_HTTP);
+	//user2 = sauth_adduser("chan", "bar2", SERVER_HTTP);
+	//user3 = sauth_adduser("jeff", "bar3", SERVER_HTTP);
+  	//user4 = sauth_adduser("shea", "bar3", SERVER_HTTP);
+  	//user5 = sauth_adduser("toby", "bar3", SERVER_HTTP);
 
 	// verification for email server
 	#ifdef USE_SMTP_AUTH
