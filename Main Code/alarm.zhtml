@@ -1,30 +1,12 @@
-<!DOCTYPE html>
-<!--ATTENTION! This page must have extension .zhtml -->
 <html>
 	<head>
 		<title>Alarm Monitor</title>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
 		<style type="text/css">
-
-.labels {
-	padding-left: 20px;
-	min-width:150px;
-	width: 20%;
-	float:left;
-}
-			.pic {
-				height:100px;
-				width:100px;
-				background-color:green;
-			}
-			
-			body {
-				margin: 0 auto;
-				text-align:center;
-			}
-			table {
-				margin: 0 auto;
-			}
+			.labels { padding-left: 20px; min-width:150px; width: 20%; float:left; }
+			.pic { height:100px; width:100px; background-color:green; }
+			body { margin: 0 auto; text-align:center; }
+			table { margin: 0 auto; }
 		</style>
 	</head>
 	<body>
@@ -36,7 +18,7 @@
 			<th>Zone 2</th>
 			<th>Zone 3</th>
 			<th>Zone 4</th>
-			<tr><!-- PICTURES -->
+			<tr>
 				<td><div id="zone0pic" class="pic"></div></td>
 				<td><div id="zone1pic" class="pic"></div></td>
 				<td><div id="zone2pic" class="pic"></div></td>
@@ -72,9 +54,7 @@
 			</table>
 			<input type="submit" name="individual" for="singleZones" value="Go">
 		</form>
-		
 		<br />
-
 		<!-- Bypass All Code -->
 		<form method="post" id="bypassAll">
 			<input type="hidden" name="zone0Alarm" value="1" />
@@ -88,9 +68,7 @@
 			<input type="hidden" name="alarming" value="1" />
 			<input type="submit" name="bypass" value="Bypass All" for="bypassAll"/>
 		</form>
-		
 		<br />
-		
 		<!-- Arm All Code -->
 		<form method="post" id="armAll">
 			<input type="hidden" name="zone0State" value="0" />
@@ -99,24 +77,21 @@
 			<input type="hidden" name="zone3State" value="0" />
 			<input type="submit" name="arm" value="Arm All" for="armAll" />
 		</form>
-		<div id="settings">
-
-<form id="userSettings" method="post">
-	<!--need to send the user's number and carrier choice back to server-->
-<label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="11" value="<?z print($phoneNumber) ?>" /><br>
-<label class="labels">Carrier</label>
-<select name="carrierChoice">
-<option value="0" <?z if($carrierChoice == 0) { ?> selected='selected'<?z } ?>>ATT</option>
-<option value="1" <?z if($carrierChoice == 1) { ?> selected='selected'<?z } ?>>Sprint</option>
-<option value="2" <?z if($carrierChoice == 2) { ?> selected='selected'<?z } ?>>Verizon</option>
-<option value="3" <?z if($carrierChoice == 3) { ?> selected='selected'<?z } ?>>T-Mobile</option>
-<option value="4" <?z if($carrierChoice == 4) { ?> selected='selected'<?z } ?>>Test</option>
-</select><br>
-<input type=submit value="Submit" for="userSettings" />
-</form>
-</div>
+	<div id="settings">
+	<form id="userSettings" method="post">
+	<label class="labels">Mobile Number</label><input type=text name="phoneNumber" size="11" value="<?z print($phoneNumber) ?>" /><br>
+	<label class="labels">Carrier</label>
+	<select name="carrierChoice">
+		<option value="0" <?z if($carrierChoice == 0) { ?> selected='selected'<?z } ?>>ATT</option>
+		<option value="1" <?z if($carrierChoice == 1) { ?> selected='selected'<?z } ?>>Sprint</option>
+		<option value="2" <?z if($carrierChoice == 2) { ?> selected='selected'<?z } ?>>Verizon</option>
+		<option value="3" <?z if($carrierChoice == 3) { ?> selected='selected'<?z } ?>>T-Mobile</option>
+	</select><br>
+	<input type=submit value="Submit" for="userSettings" />
+	</form>
+	</div>
+<br><a href="/chgUser.zhtml">Change Passwords</a>
 <script language="javascript">
-	
 handleError = function(){
 	//handle the error
 	setTimeout(update, 500);
@@ -147,7 +122,6 @@ if (zones[2] === '1'){
 	else 
 		$('#zone1pic').css('background-color', 'green');
 
-
 	if (zones[4] === '1'){
 		$('#zone2pic').css('background-color', 'blue');
 	}
@@ -157,7 +131,6 @@ if (zones[2] === '1'){
 	else 
 		$('#zone2pic').css('background-color', 'green');
 
-
 	if (zones[6] === '1'){
 		$('#zone3pic').css('background-color', 'blue');
 	}
@@ -166,7 +139,6 @@ if (zones[2] === '1'){
 	}
 	else 
 		$('#zone3pic').css('background-color', 'green');
-
 
 	setTimeout(update, 500);
 };
@@ -181,6 +153,5 @@ update = function() {
 
 $(update);
 </script>
-	</body>
+</body>
 </html>
-

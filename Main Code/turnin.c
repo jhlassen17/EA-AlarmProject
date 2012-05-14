@@ -51,7 +51,7 @@
 #define STACK_CNT_512 				OS_MAX_TASKS + 1 		// number of 512 byte stacks (task stacks + initial program stack)
 #define OS_TASK_CHANGE_PRIO_EN   	1
 #define OS_TIME_DLY_RESUME_EN 	 	1
-#define MSG_QUEUE_SIZE     		 	25
+#define MSG_QUEUE_SIZE     		 	20
 
 // RTOS Priorities, Higher # means lower priority
 #define TASK_HTTP_PRIORITY		 	19
@@ -84,7 +84,6 @@
 #define CARRIER1	   "@messaging.sprintpcs.com"
 #define CARRIER2	   "@vtext.com"
 #define CARRIER3	   "@tmomail.net"
-#define CARRIER4	   "@gmail.com"
 
 // Authentication Settings
 #define USE_HTTP_DIGEST_AUTHENTICATION		1
@@ -123,12 +122,14 @@ void      *msgQueueData[MSG_QUEUE_SIZE];
  void setupSMTP();					// Sets up SMTP related items
  void setupDigOut();				// Sets up Dig out items
  int sendEmail(int email);			// Sends Email
+ void updateUser();					// Change user information
 
 
  void alarmTask(void *data);		// Alarm Task
  void httpTask(void *data);			// HTTP Task
  void switchTask(void *data);		// Swith Task
 
+ 
  void main(void);					// Main Method
 
 
@@ -147,10 +148,14 @@ int zone3Alarm;						//Zone 4 Alarm State
 int alarming;						//Are we alarming?
 int pushed;							//Was a button pressed
 // Alerts
-char carrierDomains[5][32];			//Carrier Domain Names
+char carrierDomains[4][32];			//Carrier Domain Names
 int carrierChoice;					//Current Carrier Selection
 char phoneNumber[16];				//Current Phone Number Selection
 char emailBody[4][256];				//List of email messages
+// Users
+int userIDs[4];						//List of user IDs
+int selectedUser;					//Web selected user
+char selectedPassword[11];			//Web selected password
 
  /*
   * WEB Related Variables
@@ -166,13 +171,17 @@ char emailBody[4][256];				//List of email messages
 #web alarming
 #web carrierDomains
 #web carrierChoice
-#web phoneNumber;
+#web phoneNumber
+#web selectedUser
+#web_update selectedUser updateUser
+#web selectedPassword;
 
 /*
  * WEB Items
  */
 #ximport "/alarm.zhtml" index_zhtml			//Import the Alarm Page
 #ximport "/zones.zhtml" zones_zhtml			//Import AJAX Page
+#ximport "/chgUser.zhtml" chguser_zhtml		//Import User Page
 
 /*
  * WEB MIME Setup
@@ -188,7 +197,8 @@ SSPEC_MIMETABLE_END
 SSPEC_RESOURCETABLE_START
 	SSPEC_RESOURCE_XMEMFILE("/", index_zhtml),
 	SSPEC_RESOURCE_XMEMFILE("/alarm.zhtml", index_zhtml),
-  	SSPEC_RESOURCE_XMEMFILE("/zones.zhtml", zones_zhtml)
+  	SSPEC_RESOURCE_XMEMFILE("/zones.zhtml", zones_zhtml),
+	SSPEC_RESOURCE_XMEMFILE("/chgUser.zhtml", chguser_zhtml)
 SSPEC_RESOURCETABLE_END
 
 
@@ -203,13 +213,10 @@ nodebug void initCarrierDomains() {
 	strcpy(carrierDomains[1], CARRIER1);
 	strcpy(carrierDomains[2], CARRIER2);
 	strcpy(carrierDomains[3], CARRIER3);
-	strcpy(carrierDomains[4], CARRIER4);
 
 	//Set initial phone selection
-	strcpy(phoneNumber, "heavyjeff17");
-	carrierChoice = 4;
-	//strcpy(phoneNumber,"9176489840");
-	//carrierChoice=2;
+	strcpy(phoneNumber, "9176489840");
+	carrierChoice = 2;
 }
 
 /**
@@ -247,20 +254,21 @@ void setupHttp() {
 
    // Add our users
    // Ario
-   userid = sauth_adduser("ario", "fish", SERVER_ANY);
+   userid = sauth_adduser("1", "ario", SERVER_ANY);
    sauth_setusermask(userid, admin, NULL);
+   userIDs[0] = userid;
    // Chan
-   userid = sauth_adduser("chan", "bar", SERVER_ANY);
+   userid = sauth_adduser("2", "chan", SERVER_ANY);
    sauth_setusermask(userid, admin, NULL);
+   userIDs[1] = userid;
    // Jeff
-   userid = sauth_adduser("jeff", "bar7", SERVER_ANY);
+   userid = sauth_adduser("3", "jeff", SERVER_ANY);
    sauth_setusermask(userid, admin, NULL);
+   userIDs[2] = userid;
    // Shea
-   userid = sauth_adduser("shea", "bar2", SERVER_ANY);
+   userid = sauth_adduser("4", "shea", SERVER_ANY);
    sauth_setusermask(userid, admin, NULL);
-   // Toby
-   userid = sauth_adduser("toby", "bar3", SERVER_ANY);
-   sauth_setusermask(userid, admin, NULL);
+   userIDs[3] = userid;
 
    //Done
 }
@@ -294,12 +302,21 @@ void setupDigOut() {
 	digOut(ID_BUZZER, OFF);
 }
 
+/**
+ * Changes the password for the selected user
+ */
+void updateUser()
+{
+	//Change Password
+	sauth_setpassword( userIDs[selectedUser], selectedPassword );
+}
+
 
 // Tasks
 
 /**
- * This task polls the switches and then 
- * posts a message to the message queue 
+ * This task polls the switches and then
+ * posts a message to the message queue
  * if an alarm needs to be activated
  */
 void switchTask(void *data) {
@@ -372,7 +389,6 @@ void switchTask(void *data) {
 			}
 
 			// Post the message
-			printf("Posting alarm message \n");
 			OSQPost(msgQueuePtr, (void *)&result);
 
 		}
@@ -405,7 +421,7 @@ void httpTask(void *data) {
 
 	// Loop forever
 	while(1) {
-		
+
 		// Try to take a semaphore (this will block us the second time)
  		OSSemPend(switchToHTTP, 0, &err);
 
@@ -419,13 +435,13 @@ void httpTask(void *data) {
 }
 
 /**
- * Alarm task that handles sounding the alarm and sending 
+ * Alarm task that handles sounding the alarm and sending
  * out the alerts
  */
 void alarmTask(void *data) {
 	// Error reference
 	INT8U err;
-	
+
 	// Result variables
 	char *result;
 	auto char realResult;
@@ -436,12 +452,9 @@ void alarmTask(void *data) {
 		result = (char *)OSQPend(msgQueuePtr, 0, &err);
 		realResult = *result;
 
-		// Debug
-		printf("Alarm Task Run\n");
-
 		// Check for zone 1
 		if(realResult == '0') {
-			printf("\nZone 1 Tripped!!!!\n");
+			// printf("\nZone 1 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_0_ID, ON);
 
@@ -454,7 +467,7 @@ void alarmTask(void *data) {
 			// Send the alert
 			sendEmail(0);
 		} else if(realResult == '1') {
-			printf("\nZone 12Tripped!!!!\n");
+			// printf("\nZone 12Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_1_ID, ON);
 
@@ -467,7 +480,7 @@ void alarmTask(void *data) {
 			// Send the alert
 			sendEmail(1);
 		} else if(realResult == '2') {
-			printf("\nZone 3 Tripped!!!!\n");
+			// printf("\nZone 3 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_2_ID, ON);
 
@@ -480,7 +493,7 @@ void alarmTask(void *data) {
 			// Send the alert
 			sendEmail(2);
 		} else if(realResult == '3') {
-			printf("\nZone 4 Tripped!!!!\n");
+			// printf("\nZone 4 Tripped!!!!\n");
 			digOut(ID_BUZZER, ON);
 			digOut(LED_3_ID, ON);
 
@@ -504,12 +517,6 @@ void alarmTask(void *data) {
 int sendEmail(int email) {
 	// Full email address
    char fullEmail[50];
-
-   // Check for error, should not happen any more
-   if (email < 0) {
-   	printf("Now you done fucked up son.");
-   	return -1;
-   }
 
    //Copy the phone numner
    strcpy(fullEmail, phoneNumber);
@@ -577,7 +584,4 @@ void main (void) {
 
 	// Start Multitasking
     OSStart();
-
-	// Toby
-    printf("Toby is great!");
 }
